@@ -1,0 +1,1056 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>HedgeHomies</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #e8d9b0;
+    --amber: #b8860b;
+    --amber-dark: #7a5c00;
+    --brown: #4a3000;
+    --brown-light: #7a5c2a;
+    --brown-mid: #5c3d0a;
+    --soil: #3d2800;
+    --highlight: #f5ead0;
+    --screen-bg: #c9b97a;
+    --zoomie: #e8541a;
+    --zen: #4a90b8;
+    --chaser: #9b4fb0;
+    --sage: #2a7a3a;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; user-select:none; }
+  html,body { width:100%; height:100%; background:var(--soil); font-family:'Press Start 2P',monospace; image-rendering:pixelated; overflow:hidden; }
+
+  #app { width:100%; height:100dvh; display:flex; flex-direction:column; background:var(--screen-bg); position:relative; overflow:hidden; }
+  #app::after { content:''; position:absolute; inset:0; pointer-events:none; z-index:100; background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.06) 3px,rgba(0,0,0,0.06) 4px); }
+
+  /* ── NAME SCREEN ── */
+  #nameScreen {
+    position:fixed; inset:0; z-index:500;
+    background:var(--soil);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    gap:24px; padding:32px;
+  }
+  .name-title { font-size:14px; color:var(--amber); text-align:center; line-height:1.8; text-shadow:0 0 12px rgba(184,134,11,.4); }
+  .name-sub { font-size:7px; color:var(--cream); opacity:.7; text-align:center; line-height:1.8; }
+  .name-input-wrap { width:100%; max-width:280px; border:3px solid var(--amber); background:rgba(232,217,176,.08); padding:2px; }
+  .name-input {
+    width:100%; background:transparent; border:none; outline:none;
+    font-family:'Press Start 2P',monospace; font-size:14px; color:var(--amber);
+    padding:12px 10px; text-align:center; caret-color:var(--amber);
+  }
+  .name-input::placeholder { color:rgba(184,134,11,.35); font-size:10px; }
+  .name-btn {
+    font-family:'Press Start 2P',monospace; font-size:10px;
+    background:var(--amber); color:var(--soil); border:none;
+    padding:14px 32px; cursor:pointer; letter-spacing:1px;
+    box-shadow:0 4px 0 var(--amber-dark); transition:transform .1s,box-shadow .1s;
+  }
+  .name-btn:active { transform:translateY(4px); box-shadow:none; }
+  .hog-preview { font-size:48px; animation:previewBob 2s ease-in-out infinite; }
+  @keyframes previewBob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+  /* ── TOP BAR ── */
+  .topbar { display:flex; align-items:center; justify-content:space-between; padding:8px 12px; background:rgba(61,40,0,.95); z-index:10; flex-shrink:0; gap:8px; }
+  .topbar-left { display:flex; flex-direction:column; gap:3px; min-width:0; }
+  .topbar-brand { font-size:8px; color:var(--amber); letter-spacing:1px; }
+
+  /* XP bar */
+  .xp-row { display:flex; align-items:center; gap:6px; }
+  .xp-lv { font-size:7px; color:var(--amber); white-space:nowrap; }
+  .xp-bar-bg { flex:1; height:6px; background:rgba(122,92,0,.4); border:1px solid var(--amber-dark); overflow:hidden; min-width:60px; }
+  .xp-bar-fill { height:100%; background:var(--amber); transition:width .6s ease; }
+
+  .topbar-right { display:flex; align-items:center; gap:8px; flex-shrink:0; }
+  .clock-pill { background:rgba(184,134,11,.15); border:1px solid var(--amber-dark); padding:4px 7px; text-align:right; }
+  .clock-time  { font-size:9px; color:var(--amber); }
+  .clock-phase { font-family:'VT323',monospace; font-size:13px; color:var(--cream); margin-top:1px; }
+  .pet-pill { background:rgba(184,134,11,.15); border:1px solid var(--amber-dark); padding:4px 7px; }
+  .pet-name-lbl { font-size:8px; color:var(--highlight); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:80px; }
+  .pet-lv-lbl   { font-family:'VT323',monospace; font-size:13px; color:var(--amber); }
+
+  /* ── TIME STRIP ── */
+  .time-strip { display:flex; align-items:center; gap:10px; padding:5px 14px 6px; background:rgba(61,40,0,.75); border-bottom:1px solid rgba(184,134,11,.2); flex-shrink:0; }
+  .time-lbl { font-size:5px; color:var(--amber); opacity:.7; white-space:nowrap; }
+  .time-slider { flex:1; -webkit-appearance:none; height:5px; background:var(--brown); border-radius:2px; outline:none; cursor:pointer; }
+  .time-slider::-webkit-slider-thumb { -webkit-appearance:none; width:18px; height:18px; background:var(--amber); border-radius:3px; cursor:pointer; box-shadow:0 2px 0 rgba(0,0,0,.4); }
+
+  /* ── SCREENS ── */
+  .screens-wrap { flex:1; position:relative; overflow:hidden; }
+  .screens-track { display:flex; width:200%; height:100%; transition:transform .3s steps(6); }
+  .screens-track.show-dna { transform:translateX(-50%); }
+  .screen-panel { width:50%; height:100%; position:relative; overflow:hidden; }
+
+  /* ── SCENE ── */
+  .scene { position:absolute; inset:0; }
+  .sky-layer   { position:absolute; inset:0; transition:background 2s ease; }
+  .stars-layer { position:absolute; inset:0; opacity:0; transition:opacity 2s ease; }
+  .star        { position:absolute; width:3px; height:3px; background:var(--highlight); border-radius:1px; }
+  .celestial   { position:absolute; top:16px; right:24px; border-radius:50%; opacity:0; transition:opacity 2s ease; }
+  .moon-obj { width:32px; height:32px; background:var(--highlight); box-shadow:0 0 12px var(--cream); }
+  .sun-obj  { width:40px; height:40px; background:var(--amber); box-shadow:0 0 20px var(--amber); top:18px; right:22px; }
+
+  .ground-layer { position:absolute; bottom:0; left:0; right:0; }
+  .grass-strip  { height:36px; background:#5c7a2a; position:relative; }
+  .grass-strip::before { content:''; position:absolute; top:-6px; left:0; right:0; height:8px; background:repeating-linear-gradient(90deg,#5c7a2a 0,#5c7a2a 8px,#4a6620 8px,#4a6620 12px,#6a8c30 12px,#6a8c30 16px,#5c7a2a 16px,#5c7a2a 24px); }
+  .dirt-strip   { height:48px; background:var(--brown-mid); border-top:4px solid var(--brown-light); }
+
+  .tree { position:absolute; bottom:78px; }
+  .tree-trunk { width:12px; height:24px; background:var(--brown-mid); margin:0 auto; }
+  .tree-top  { width:38px; height:44px; background:#3d5c1a; clip-path:polygon(50% 0%,0% 100%,100% 100%); margin-bottom:-6px; }
+  .tree-top2 { width:48px; height:34px; background:#4a6620; clip-path:polygon(50% 0%,0% 100%,100% 100%); margin:0 auto; margin-bottom:-4px; }
+
+  .cactus      { position:absolute; bottom:82px; right:28px; }
+  .cactus-body { width:14px; height:40px; background:#3d5c1a; margin:0 auto; position:relative; }
+  .cactus-arm  { position:absolute; width:20px; height:10px; background:#3d5c1a; top:12px; }
+  .cactus-arm.left  { right:100%; border-radius:0 0 0 6px; }
+  .cactus-arm.right { left:100%;  border-radius:0 0 6px 0; }
+
+  .burrow-wrap  { position:absolute; bottom:72px; left:50%; transform:translateX(-50%); width:140px; text-align:center; }
+  .burrow-hole  { width:96px; height:44px; background:var(--soil); border-radius:50% 50% 0 0/100% 100% 0 0; margin:0 auto; box-shadow:inset 0 -6px 14px rgba(0,0,0,.6),0 -3px 0 var(--brown-light); }
+  .burrow-mound { width:140px; height:16px; background:var(--brown-mid); border-radius:50%; margin-top:-6px; box-shadow:0 -3px 0 var(--brown-light); }
+
+  .firefly { position:absolute; width:5px; height:5px; background:#d4ff00; border-radius:50%; opacity:0; box-shadow:0 0 6px #d4ff00; animation:flyAround 6s ease-in-out infinite; }
+  @keyframes flyAround { 0%{opacity:0;transform:translate(0,0)} 15%{opacity:.9} 50%{opacity:.6;transform:translate(30px,-24px)} 85%{opacity:.9} 100%{opacity:0;transform:translate(-8px,-40px)} }
+
+  /* ── HOG ── */
+  .hog-wrap { position:absolute; bottom:calc(72px + 44px + 4px); left:50%; transform:translateX(-50%); width:128px; height:96px; cursor:pointer; z-index:5; touch-action:manipulation; }
+  #hogSvg { filter:drop-shadow(0 4px 8px rgba(0,0,0,.45)); transition:filter .8s ease; }
+  #hogSvg.zoomie { filter:drop-shadow(0 0 14px #ff7a3a) drop-shadow(0 4px 8px rgba(0,0,0,.4)); }
+  #hogSvg.zen    { filter:drop-shadow(0 0 14px #7ab8e8) drop-shadow(0 4px 8px rgba(0,0,0,.4)); }
+  #hogSvg.chaser { filter:drop-shadow(0 0 14px #cc77ee) drop-shadow(0 4px 8px rgba(0,0,0,.4)); }
+  #hogSvg.sage   { filter:drop-shadow(0 0 14px #55aa66) drop-shadow(0 4px 8px rgba(0,0,0,.4)); }
+
+  .zzz-wrap { position:absolute; top:-44px; right:-6px; display:flex; flex-direction:column; align-items:flex-end; gap:3px; }
+  .z { color:var(--cream); opacity:0; animation:floatZ 3s ease-in-out infinite; text-shadow:2px 2px 0 var(--amber-dark); }
+  .z1{font-size:9px;animation-delay:0s} .z2{font-size:12px;animation-delay:.8s} .z3{font-size:16px;animation-delay:1.6s}
+  @keyframes floatZ { 0%{opacity:0;transform:translate(0,0)} 20%{opacity:.9} 80%{opacity:.4} 100%{opacity:0;transform:translate(12px,-20px)} }
+
+  .hog-wrap.sleeping { animation:sleepBob 4s ease-in-out infinite; }
+  @keyframes sleepBob { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(-4px)} }
+  .hog-wrap.stirring { animation:stir .9s ease-in-out infinite; }
+  @keyframes stir { 0%,100%{transform:translateX(-50%) rotate(-4deg)} 50%{transform:translateX(-50%) rotate(4deg)} }
+  .hog-wrap.active { animation:scuttle .45s steps(2) infinite; }
+  @keyframes scuttle { 0%{transform:translateX(-50%) translateY(0)} 100%{transform:translateX(-52%) translateY(-3px)} }
+
+  /* ── LEVEL UP FLASH ── */
+  .levelup-flash {
+    position:absolute; inset:0; background:rgba(184,134,11,.0);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    z-index:60; pointer-events:none; opacity:0; transition:opacity .3s;
+  }
+  .levelup-flash.show { opacity:1; animation:flashIn .6s ease; }
+  @keyframes flashIn { 0%{background:rgba(184,134,11,.5)} 100%{background:rgba(184,134,11,.0)} }
+  .levelup-txt { font-size:18px; color:var(--highlight); text-shadow:0 0 20px var(--amber),2px 2px 0 var(--soil); animation:lvlPop .4s ease; }
+  @keyframes lvlPop { 0%{transform:scale(.5)} 60%{transform:scale(1.2)} 100%{transform:scale(1)} }
+  .levelup-sub { font-size:8px; color:var(--amber); margin-top:8px; }
+
+  /* ── GREAT QUILLING ── */
+  #quillingOverlay {
+    position:fixed; inset:0; z-index:600;
+    background:var(--soil);
+    display:none; flex-direction:column; align-items:center; justify-content:center;
+    gap:16px; padding:32px; text-align:center;
+  }
+  #quillingOverlay.show { display:flex; }
+  .quilling-title { font-size:13px; color:var(--amber); line-height:1.8; }
+  .quilling-sub   { font-size:7px; color:var(--cream); line-height:2; opacity:.8; }
+  .quilling-hog   { font-size:56px; animation:quillingPulse 1s ease-in-out infinite; }
+  @keyframes quillingPulse { 0%,100%{transform:scale(1)} 50%{transform:scale(1.15)} }
+  .quilling-btn { font-family:'Press Start 2P',monospace; font-size:9px; background:var(--amber); color:var(--soil); border:none; padding:14px 28px; cursor:pointer; margin-top:8px; box-shadow:0 4px 0 var(--amber-dark); }
+  .quilling-type-badge { font-size:10px; padding:6px 12px; border:2px solid var(--amber); color:var(--amber); letter-spacing:1px; }
+
+  /* ── ANOINTING ── */
+  .scent-spray {
+    position:absolute; pointer-events:none; z-index:30;
+    font-size:20px; opacity:0; animation:sprayFloat 1.4s ease-out forwards;
+  }
+  @keyframes sprayFloat { 0%{opacity:1;transform:translate(0,0) scale(1)} 100%{opacity:0;transform:translate(0,-60px) scale(1.8)} }
+
+  /* ── BUG HUNT ── */
+  #bugHuntOverlay {
+    position:absolute; inset:0; z-index:40;
+    display:none; pointer-events:none;
+  }
+  #bugHuntOverlay.active { display:block; pointer-events:all; }
+
+  .bug {
+    position:absolute; font-size:22px; cursor:pointer;
+    animation:bugWiggle .3s steps(2) infinite;
+    touch-action:manipulation; z-index:41;
+    transition:transform .1s;
+  }
+  @keyframes bugWiggle { 0%{transform:rotate(-8deg)} 100%{transform:rotate(8deg)} }
+  .bug:active { transform:scale(1.4); }
+
+  .bug-catch-txt {
+    position:absolute; font-size:10px; color:var(--highlight);
+    background:var(--soil); border:2px solid var(--amber);
+    padding:3px 7px; pointer-events:none; white-space:nowrap;
+    animation:catchPop .8s ease-out forwards;
+  }
+  @keyframes catchPop { 0%{opacity:1;transform:translateY(0)} 100%{opacity:0;transform:translateY(-40px)} }
+
+  .hunt-timer {
+    position:absolute; top:8px; left:50%; transform:translateX(-50%);
+    font-size:9px; color:var(--soil); background:rgba(232,217,176,.9);
+    border:2px solid var(--soil); padding:4px 10px; z-index:42; pointer-events:none;
+  }
+  .hunt-score {
+    position:absolute; top:36px; left:50%; transform:translateX(-50%);
+    font-size:8px; color:var(--amber); background:rgba(61,40,0,.85);
+    border:1px solid var(--amber-dark); padding:3px 8px; z-index:42; pointer-events:none;
+  }
+  .hunt-end-btn {
+    position:absolute; bottom:100px; left:50%; transform:translateX(-50%);
+    font-family:'Press Start 2P',monospace; font-size:8px;
+    background:var(--soil); color:var(--amber); border:2px solid var(--amber);
+    padding:10px 18px; cursor:pointer; z-index:42; touch-action:manipulation;
+    white-space:nowrap;
+  }
+
+  /* ── PHASE BANNER & BUBBLE ── */
+  .phase-banner { position:absolute; bottom:100px; left:50%; transform:translateX(-50%); font-size:8px; color:var(--highlight); background:var(--soil); padding:5px 10px; border:2px solid var(--amber-dark); white-space:nowrap; opacity:0; transition:opacity .4s; z-index:10; pointer-events:none; }
+  .tap-bubble   { position:absolute; top:28%; left:50%; transform:translate(-50%,-50%); font-size:13px; color:var(--soil); background:var(--highlight); border:3px solid var(--amber-dark); padding:8px 14px; white-space:nowrap; opacity:0; pointer-events:none; z-index:20; transition:opacity .15s; }
+
+  /* ── STAT STRIP ── */
+  .stat-strip { position:absolute; bottom:0; left:0; right:0; background:rgba(61,40,0,.9); padding:8px 12px 10px; display:flex; gap:10px; z-index:10; }
+  .stat-item  { flex:1; }
+  .stat-lbl   { font-size:6px; color:var(--amber); margin-bottom:4px; }
+  .stat-bg    { height:8px; background:var(--amber-dark); border:1px solid var(--soil); overflow:hidden; border-radius:1px; }
+  .stat-fill  { height:100%; background:var(--cream); transition:width 1s ease; border-radius:1px; }
+
+  /* ── DNA SCREEN ── */
+  .dna-screen  { width:50%; height:100%; background:var(--screen-bg); overflow-y:auto; display:flex; flex-direction:column; }
+  .dna-inner   { padding:14px 14px 110px; display:flex; flex-direction:column; gap:12px; }
+  .dna-section-title { font-size:7px; color:var(--highlight); background:var(--soil); padding:6px 10px; text-align:center; letter-spacing:2px; border-bottom:2px solid var(--amber-dark); }
+
+  .dominant-badge { display:flex; align-items:center; justify-content:space-between; border:2px solid var(--soil); padding:10px 12px; background:rgba(60,40,0,.15); }
+  .badge-sub  { font-size:7px; color:var(--soil); opacity:.65; margin-bottom:4px; }
+  .badge-name { font-size:11px; color:var(--soil); }
+  .badge-emoji { font-size:32px; line-height:1; }
+
+  .p-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+  .p-card { border:2px solid var(--soil); padding:10px 8px; background:rgba(180,150,60,.2); cursor:pointer; position:relative; transition:background .2s,border-color .2s; touch-action:manipulation; }
+  .p-card.dominant { border-color:var(--amber); background:rgba(200,170,80,.4); }
+  .p-card.dominant::after { content:'★'; position:absolute; top:4px; right:6px; font-size:10px; color:var(--amber); }
+  .p-card.locked { border-color:gold; background:rgba(255,215,0,.15); }
+  .p-card.locked::before { content:'🔒'; position:absolute; bottom:4px; right:6px; font-size:10px; }
+
+  .p-card-head { display:flex; align-items:center; gap:6px; margin-bottom:6px; }
+  .p-dot { width:10px; height:10px; border-radius:2px; flex-shrink:0; }
+  .p-dot.zoomie{background:var(--zoomie)} .p-dot.zen{background:var(--zen)} .p-dot.chaser{background:var(--chaser)} .p-dot.sage{background:var(--sage)}
+  .p-card-name-txt { font-size:7px; color:var(--soil); }
+  .p-bar-bg { height:6px; background:var(--amber-dark); border:1px solid var(--soil); overflow:hidden; margin-bottom:5px; }
+  .p-bar-fill { height:100%; transition:width .8s ease; }
+  .p-bar-fill.zoomie{background:var(--zoomie)} .p-bar-fill.zen{background:var(--zen)} .p-bar-fill.chaser{background:var(--chaser)} .p-bar-fill.sage{background:var(--sage)}
+  .p-card-desc { font-family:'VT323',monospace; font-size:14px; color:var(--brown-mid); line-height:1.1; }
+
+  .dna-inputs { display:flex; flex-direction:column; gap:6px; border:1px solid var(--soil); padding:10px; background:rgba(60,40,0,.1); }
+  .dna-inputs-title { font-size:6px; color:var(--soil); text-align:center; letter-spacing:1px; margin-bottom:4px; }
+  .dna-row  { display:flex; align-items:center; gap:8px; }
+  .dna-lbl  { font-family:'VT323',monospace; font-size:16px; color:var(--soil); width:72px; flex-shrink:0; line-height:1; }
+  .dna-bar-bg   { flex:1; height:8px; background:var(--amber-dark); border:1px solid var(--soil); overflow:hidden; }
+  .dna-bar-fill { height:100%; transition:width 1s ease; }
+  .dna-val  { font-family:'VT323',monospace; font-size:16px; color:var(--soil); width:28px; text-align:right; line-height:1; }
+
+  .p-btns { display:flex; gap:6px; flex-wrap:wrap; justify-content:center; }
+  .p-btn  { font-family:'Press Start 2P',monospace; font-size:7px; padding:8px 10px; border:2px solid var(--soil); background:rgba(180,150,60,.25); color:var(--soil); cursor:pointer; touch-action:manipulation; transition:background .15s; min-width:52px; text-align:center; }
+  .p-btn:active { background:rgba(200,170,80,.6); }
+  .p-btn.sel { background:var(--amber); color:var(--highlight); }
+  .p-btn:disabled { opacity:.4; cursor:default; }
+
+  /* Quilling locked notice */
+  .quilling-notice { font-size:6px; color:var(--amber); text-align:center; padding:6px; border:1px solid var(--amber-dark); background:rgba(184,134,11,.1); line-height:1.8; display:none; }
+  .quilling-notice.show { display:block; }
+
+  /* ── BOTTOM NAV ── */
+  .bottom-nav { position:fixed; bottom:0; left:0; right:0; z-index:50; background:rgba(61,40,0,.97); border-top:2px solid var(--amber-dark); display:flex; align-items:stretch; height:56px; padding-bottom:env(safe-area-inset-bottom); }
+  .nav-btn { flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:3px; border:none; background:transparent; cursor:pointer; touch-action:manipulation; color:var(--amber-dark); font-family:'Press Start 2P',monospace; border-right:1px solid rgba(184,134,11,.2); transition:background .15s; }
+  .nav-btn:last-child { border-right:none; }
+  .nav-btn.active { background:rgba(184,134,11,.15); color:var(--amber); }
+  .nav-btn:active { background:rgba(184,134,11,.25); }
+  .nav-icon  { font-size:18px; line-height:1; }
+  .nav-label { font-size:5px; }
+
+  /* ── ACTION STRIP ── */
+  .action-strip { position:fixed; bottom:56px; left:0; right:0; z-index:49; display:flex; background:rgba(61,40,0,.82); border-top:1px solid rgba(184,134,11,.3); }
+  .action-btn { flex:1; font-family:'Press Start 2P',monospace; font-size:8px; padding:10px 6px; border:none; border-right:1px solid rgba(184,134,11,.2); cursor:pointer; touch-action:manipulation; transition:background .1s; }
+  .action-btn:last-child { border-right:none; }
+  .action-btn.feed   { background:var(--brown-light); color:var(--cream); }
+  .action-btn.pet    { background:var(--amber); color:var(--soil); }
+  .action-btn.anoint { background:var(--chaser); color:var(--highlight); }
+  .action-btn.hunt   { background:var(--zoomie); color:var(--highlight); }
+  .action-btn:active { filter:brightness(1.2); }
+  .action-btn:disabled { opacity:.35; cursor:default; filter:none; }
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- ══ NAME SCREEN ══ -->
+  <div id="nameScreen">
+    <div class="hog-preview">🦔</div>
+    <div class="name-title">YOUR HOMIE<br>HAS ARRIVED.</div>
+    <div class="name-sub">Give them a name to begin.</div>
+    <div class="name-input-wrap">
+      <input class="name-input" id="nameInput" type="text" maxlength="10" placeholder="e.g. SPIKE" autocomplete="off" spellcheck="false">
+    </div>
+    <button class="name-btn" onclick="confirmName()">► CONFIRM</button>
+  </div>
+
+  <!-- ══ GREAT QUILLING OVERLAY ══ -->
+  <div id="quillingOverlay">
+    <div class="quilling-hog" id="quillingHog">🦔</div>
+    <div class="quilling-title">THE GREAT<br>QUILLING!</div>
+    <div class="quilling-type-badge" id="quillingBadge">MIDNIGHT ZOOMIE</div>
+    <div class="quilling-sub" id="quillingSub">Your Homie has evolved.<br>Their quills are set forever.</div>
+    <button class="quilling-btn" onclick="confirmQuilling()">► EMBRACE IT</button>
+  </div>
+
+  <!-- ══ TOP BAR ══ -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-brand">HedgeHomies</div>
+      <div class="xp-row">
+        <div class="xp-lv" id="xpLvLabel">LV.1</div>
+        <div class="xp-bar-bg"><div class="xp-bar-fill" id="xpBar" style="width:0%"></div></div>
+      </div>
+    </div>
+    <div class="topbar-right">
+      <div class="pet-pill">
+        <div class="pet-name-lbl" id="petNameLabel">???</div>
+        <div class="pet-lv-lbl" id="petLvLabel">LV.1</div>
+      </div>
+      <div class="clock-pill">
+        <div class="clock-time" id="clockTime">--:--</div>
+        <div class="clock-phase" id="clockPhase">...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TIME SIM -->
+  <div class="time-strip">
+    <div class="time-lbl">TIME</div>
+    <input type="range" class="time-slider" id="timeSlider" min="0" max="23" value="10">
+  </div>
+
+  <!-- ══ SCREENS ══ -->
+  <div class="screens-wrap">
+    <div class="screens-track" id="screensTrack">
+
+      <!-- BURROW SCREEN -->
+      <div class="screen-panel">
+        <div class="scene">
+          <div class="sky-layer" id="sky"></div>
+          <div class="stars-layer" id="stars"></div>
+          <div class="celestial moon-obj" id="moon"></div>
+          <div class="celestial sun-obj"  id="sun"></div>
+
+          <div class="tree" style="left:14px"><div class="tree-top"></div><div class="tree-top2"></div><div class="tree-trunk"></div></div>
+          <div class="tree" style="left:60px;transform:scale(.65);transform-origin:bottom"><div class="tree-top"></div><div class="tree-top2"></div><div class="tree-trunk"></div></div>
+          <div class="cactus"><div class="cactus-body"><div class="cactus-arm left"></div><div class="cactus-arm right"></div></div></div>
+
+          <div class="ground-layer"><div class="grass-strip"></div><div class="dirt-strip"></div></div>
+          <div class="burrow-wrap"><div class="burrow-hole"></div><div class="burrow-mound"></div></div>
+
+          <!-- Hedgehog SVG -->
+          <div class="hog-wrap sleeping" id="hog" onclick="tapHog()">
+            <svg id="hogSvg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 24" width="128" height="96" style="display:block;image-rendering:pixelated;overflow:visible">
+              <rect id="q0"  x="3"  y="10" width="2" height="2" fill="#7a5c00"/>
+              <rect id="q1"  x="2"  y="8"  width="2" height="2" fill="#7a5c00"/>
+              <rect id="q2"  x="4"  y="6"  width="2" height="2" fill="#7a5c00"/>
+              <rect id="q3"  x="7"  y="4"  width="2" height="2" fill="#7a5c00"/>
+              <rect id="q4"  x="10" y="3"  width="2" height="2" fill="#7a5c00"/>
+              <rect id="q5"  x="13" y="2"  width="2" height="2" fill="#7a5c00"/>
+              <rect id="q6"  x="16" y="3"  width="2" height="2" fill="#7a5c00"/>
+              <rect id="q7"  x="19" y="4"  width="2" height="2" fill="#7a5c00"/>
+              <rect id="q8"  x="21" y="6"  width="2" height="2" fill="#7a5c00"/>
+              <rect id="q9"  x="22" y="8"  width="2" height="2" fill="#7a5c00"/>
+              <rect id="q10" x="22" y="11" width="2" height="2" fill="#7a5c00"/>
+              <rect class="qbody" x="4"  y="8"  width="18" height="2" fill="#7a5c00"/>
+              <rect class="qbody" x="3"  y="10" width="20" height="2" fill="#7a5c00"/>
+              <rect class="qbody" x="3"  y="12" width="19" height="2" fill="#7a5c00"/>
+              <rect class="qbody" x="4"  y="14" width="17" height="2" fill="#7a5c00"/>
+              <rect class="qbody" x="6"  y="16" width="14" height="2" fill="#7a5c00"/>
+              <rect class="qbody" x="5"  y="6"  width="16" height="2" fill="#7a5c00"/>
+              <rect x="6"  y="9"  width="1" height="5" fill="rgba(0,0,0,0.18)"/>
+              <rect x="9"  y="7"  width="1" height="7" fill="rgba(0,0,0,0.18)"/>
+              <rect x="12" y="6"  width="1" height="8" fill="rgba(0,0,0,0.18)"/>
+              <rect x="15" y="6"  width="1" height="8" fill="rgba(0,0,0,0.18)"/>
+              <rect x="18" y="7"  width="1" height="7" fill="rgba(0,0,0,0.18)"/>
+              <rect x="21" y="9"  width="1" height="5" fill="rgba(0,0,0,0.18)"/>
+              <rect x="8"  y="5"  width="3" height="1" fill="rgba(255,220,120,0.25)"/>
+              <rect x="13" y="4"  width="4" height="1" fill="rgba(255,220,120,0.25)"/>
+              <rect x="5"  y="17" width="16" height="2" fill="#c8a060"/>
+              <rect x="7"  y="19" width="12" height="2" fill="#c8a060"/>
+              <rect x="9"  y="21" width="8"  height="1" fill="#b08040"/>
+              <rect x="22" y="12" width="6"  height="5" fill="#c8a060"/>
+              <rect x="23" y="11" width="5"  height="2" fill="#c8a060"/>
+              <rect x="24" y="17" width="4"  height="2" fill="#b08040"/>
+              <rect x="27" y="13" width="3"  height="3" fill="#d4b070"/>
+              <rect x="28" y="12" width="2"  height="1" fill="#d4b070"/>
+              <rect id="hogNose"    x="29" y="13" width="2" height="2" fill="#3a1800"/>
+              <rect id="hogEyeRect" x="25" y="13" width="3" height="3" fill="#1a0a00"/>
+              <rect x="25" y="13" width="1" height="1" fill="#ffffff"/>
+              <rect x="23" y="10" width="2" height="2" fill="#c8a060"/>
+              <rect x="24" y="9"  width="2" height="2" fill="#d4b070"/>
+              <rect x="8"  y="21" width="3" height="2" fill="#7a5c2a"/>
+              <rect x="13" y="21" width="3" height="2" fill="#7a5c2a"/>
+              <rect x="18" y="21" width="3" height="2" fill="#7a5c2a"/>
+              <rect x="8"  y="23" width="1" height="1" fill="#5c3d0a"/>
+              <rect x="10" y="23" width="1" height="1" fill="#5c3d0a"/>
+              <rect x="13" y="23" width="1" height="1" fill="#5c3d0a"/>
+              <rect x="15" y="23" width="1" height="1" fill="#5c3d0a"/>
+              <rect x="18" y="23" width="1" height="1" fill="#5c3d0a"/>
+              <rect x="20" y="23" width="1" height="1" fill="#5c3d0a"/>
+              <rect x="3"  y="16" width="2" height="2" fill="#c8a060"/>
+            </svg>
+            <div class="zzz-wrap" id="zzz">
+              <span class="z z1">z</span><span class="z z2">z</span><span class="z z3">Z</span>
+            </div>
+          </div>
+
+          <!-- Fireflies -->
+          <div class="firefly" style="left:18%;top:38%"></div>
+          <div class="firefly" style="left:62%;top:52%;animation-delay:2.1s"></div>
+          <div class="firefly" style="left:42%;top:30%;animation-delay:4.3s"></div>
+
+          <!-- Bug Hunt overlay -->
+          <div id="bugHuntOverlay">
+            <div class="hunt-timer" id="huntTimer">0:20</div>
+            <div class="hunt-score" id="huntScore">BUGS: 0</div>
+            <button class="hunt-end-btn" onclick="endBugHunt()">✕ END HUNT</button>
+          </div>
+
+          <!-- Level up flash -->
+          <div class="levelup-flash" id="lvlFlash">
+            <div class="levelup-txt" id="lvlFlashTxt">LEVEL UP!</div>
+            <div class="levelup-sub" id="lvlFlashSub">LV.2</div>
+          </div>
+
+          <div class="phase-banner" id="phaseBanner"></div>
+          <div class="tap-bubble"   id="tapBubble"></div>
+
+          <div class="stat-strip">
+            <div class="stat-item"><div class="stat-lbl">MOOD</div><div class="stat-bg"><div class="stat-fill" id="moodBar" style="width:60%"></div></div></div>
+            <div class="stat-item"><div class="stat-lbl">HUNGER</div><div class="stat-bg"><div class="stat-fill" id="hungerBar" style="width:40%"></div></div></div>
+            <div class="stat-item"><div class="stat-lbl">ENERGY</div><div class="stat-bg"><div class="stat-fill" id="energyBar" style="width:80%"></div></div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- DNA SCREEN -->
+      <div class="dna-screen">
+        <div class="dna-inner">
+          <div class="dna-section-title">◈ HOG-DNA PROFILE ◈</div>
+
+          <div class="dominant-badge">
+            <div>
+              <div class="badge-sub">DOMINANT TYPE</div>
+              <div class="badge-name" id="dominantName">GENERIC HOG</div>
+            </div>
+            <div class="badge-emoji" id="dominantIcon">🦔</div>
+          </div>
+
+          <div class="p-grid">
+            <div class="p-card" id="card-zoomie" onclick="setPersonality('zoomie')">
+              <div class="p-card-head"><div class="p-dot zoomie"></div><div class="p-card-name-txt">ZOOMIE</div></div>
+              <div class="p-bar-bg"><div class="p-bar-fill zoomie" id="bar-zoomie" style="width:0%"></div></div>
+              <div class="p-card-desc">Energy. Speed. Bug hunter.</div>
+            </div>
+            <div class="p-card" id="card-zen" onclick="setPersonality('zen')">
+              <div class="p-card-head"><div class="p-dot zen"></div><div class="p-card-name-txt">ZEN-HOG</div></div>
+              <div class="p-bar-bg"><div class="p-bar-fill zen" id="bar-zen" style="width:0%"></div></div>
+              <div class="p-card-desc">Calm. Emotional support.</div>
+            </div>
+            <div class="p-card" id="card-chaser" onclick="setPersonality('chaser')">
+              <div class="p-card-head"><div class="p-dot chaser"></div><div class="p-card-name-txt">CHASER</div></div>
+              <div class="p-bar-bg"><div class="p-bar-fill chaser" id="bar-chaser" style="width:0%"></div></div>
+              <div class="p-card-desc">Visual. Rare scent collector.</div>
+            </div>
+            <div class="p-card" id="card-sage" onclick="setPersonality('sage')">
+              <div class="p-card-head"><div class="p-dot sage"></div><div class="p-card-name-txt">GR. SAGE</div></div>
+              <div class="p-bar-bg"><div class="p-bar-fill sage" id="bar-sage" style="width:0%"></div></div>
+              <div class="p-card-desc">Reclusive. Artifact finder.</div>
+            </div>
+          </div>
+
+          <div class="dna-inputs">
+            <div class="dna-inputs-title">─ HOG-DNA INPUTS ─</div>
+            <div class="dna-row"><div class="dna-lbl">PROTEIN</div><div class="dna-bar-bg"><div class="dna-bar-fill" id="dna-protein" style="width:30%;background:var(--zoomie)"></div></div><div class="dna-val" id="val-protein">30</div></div>
+            <div class="dna-row"><div class="dna-lbl">PETS</div><div class="dna-bar-bg"><div class="dna-bar-fill" id="dna-pets" style="width:20%;background:var(--zen)"></div></div><div class="dna-val" id="val-pets">20</div></div>
+            <div class="dna-row"><div class="dna-lbl">SCENTS</div><div class="dna-bar-bg"><div class="dna-bar-fill" id="dna-scents" style="width:10%;background:var(--chaser)"></div></div><div class="dna-val" id="val-scents">10</div></div>
+            <div class="dna-row"><div class="dna-lbl">SOLITUDE</div><div class="dna-bar-bg"><div class="dna-bar-fill" id="dna-solitude" style="width:40%;background:var(--sage)"></div></div><div class="dna-val" id="val-solitude">40</div></div>
+          </div>
+
+          <div class="quilling-notice" id="quillingNotice">🔒 GREAT QUILLING COMPLETE!<br>Quills permanently set.</div>
+
+          <div class="p-btns" id="pBtns">
+            <button class="p-btn sel" id="pbtn-generic" onclick="setPersonality('generic')">GEN 🦔</button>
+            <button class="p-btn" id="pbtn-zoomie"  onclick="setPersonality('zoomie')" style="color:var(--zoomie)">⚡ ZOM</button>
+            <button class="p-btn" id="pbtn-zen"     onclick="setPersonality('zen')"    style="color:var(--zen)">🌙 ZEN</button>
+            <button class="p-btn" id="pbtn-chaser"  onclick="setPersonality('chaser')" style="color:var(--chaser)">✨ CHS</button>
+            <button class="p-btn" id="pbtn-sage"    onclick="setPersonality('sage')"   style="color:var(--sage)">🍄 SGE</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ACTION STRIP -->
+  <div class="action-strip" id="actionStrip">
+    <button class="action-btn feed"   id="btnFeed"   onclick="feedHog()">🍖 FEED</button>
+    <button class="action-btn pet"    id="btnPet"    onclick="tapHog()">🤲 PET</button>
+    <button class="action-btn anoint" id="btnAnoint" onclick="anointHog()" disabled>✨ ANOINT</button>
+    <button class="action-btn hunt"   id="btnHunt"   onclick="startBugHunt()" disabled>🐛 HUNT</button>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <button class="nav-btn active" id="nav-burrow" onclick="switchScreen(0)"><div class="nav-icon">🏠</div><div class="nav-label">BURROW</div></button>
+    <button class="nav-btn"        id="nav-dna"    onclick="switchScreen(1)"><div class="nav-icon">🧬</div><div class="nav-label">HOG-DNA</div></button>
+  </div>
+
+</div><!-- /app -->
+
+<script>
+// ════════════════════════════════
+// STATE
+// ════════════════════════════════
+let petName = '';
+let currentHour = new Date().getHours();
+let mood = 60, hunger = 40, energy = 80;
+let tapCount = 0;
+let currentPersonality = 'generic';
+let quillingLocked = false;
+let lockedType = null;
+
+let dna = { protein: 30, pets: 20, scents: 10, solitude: 40 };
+
+// XP / Level
+let xp = 0;
+let level = 1;
+const XP_PER_LEVEL = 100; // flat for prototype
+
+// Bug Hunt
+let huntActive = false;
+let huntBugsCount = 0;
+let huntTimer = null;
+let huntSecondsLeft = 20;
+const BUGS = ['🐛','🦟','🪲','🦗','🐜'];
+
+const SCENTS = ['🌹','🌿','🍋','🌺','🍄','🌊'];
+
+// ════════════════════════════════
+// PERSONALITY DEFS
+// ════════════════════════════════
+const P = {
+  generic: { name:'GENERIC HOG',     icon:'🦔', quill:'generic',
+    active:['*sniff*','HI!','...','hello?','*blink*'],
+    sleep: ['..zzz..','*snort*','grumble..','zzz'] },
+  zoomie:  { name:'MIDNIGHT ZOOMIE', icon:'⚡', quill:'zoomie',
+    active:['ZOOM!!','BUG!','FASTER!','*zooms*','CATCH ME!'],
+    sleep: ['!!!!','*twitches*','zoom..zzz','NOPE zzz'] },
+  zen:     { name:'ZEN-HOG',         icon:'🌙', quill:'zen',
+    active:['*purrs*','...hi.','calm.','breathe.','♥'],
+    sleep: ['...','*sighs*','shh..','peace..'] },
+  chaser:  { name:'FLAVOR-CHASER',   icon:'✨', quill:'chaser',
+    active:['*sniffs*','SCENT!','ooh shiny','*anoints*','RARE!'],
+    sleep: ['mmm..zzz','*sniff*zzz','dreaming..','collect..'] },
+  sage:    { name:'GRUMPY SAGE',     icon:'🍄', quill:'sage',
+    active:['...','go away','hmph.','FOUND ONE','*glares*'],
+    sleep: ['DO. NOT.','zzZZZ','grumble','artifact..'] },
+};
+const DNA_KEY = { zoomie:'protein', zen:'pets', chaser:'scents', sage:'solitude' };
+const QUILL_COLORS = { generic:'#7a5c00', zoomie:'#e8541a', zen:'#4a90b8', chaser:'#9b4fb0', sage:'#2a7a3a' };
+
+// ════════════════════════════════
+// DOM REFS
+// ════════════════════════════════
+const hog          = document.getElementById('hog');
+const hogSvg       = document.getElementById('hogSvg');
+const zzz          = document.getElementById('zzz');
+const sky          = document.getElementById('sky');
+const moon         = document.getElementById('moon');
+const sun          = document.getElementById('sun');
+const starsEl      = document.getElementById('stars');
+const clockTime    = document.getElementById('clockTime');
+const clockPhase   = document.getElementById('clockPhase');
+const phaseBanner  = document.getElementById('phaseBanner');
+const moodBar      = document.getElementById('moodBar');
+const hungerBar    = document.getElementById('hungerBar');
+const energyBar    = document.getElementById('energyBar');
+const tapBubble    = document.getElementById('tapBubble');
+const slider       = document.getElementById('timeSlider');
+const screensTrack = document.getElementById('screensTrack');
+const dominantName = document.getElementById('dominantName');
+const dominantIcon = document.getElementById('dominantIcon');
+const actionStrip  = document.getElementById('actionStrip');
+const xpBar        = document.getElementById('xpBar');
+const xpLvLabel    = document.getElementById('xpLvLabel');
+const petNameLabel = document.getElementById('petNameLabel');
+const petLvLabel   = document.getElementById('petLvLabel');
+const lvlFlash     = document.getElementById('lvlFlash');
+const lvlFlashTxt  = document.getElementById('lvlFlashTxt');
+const lvlFlashSub  = document.getElementById('lvlFlashSub');
+const bugHuntEl    = document.getElementById('bugHuntOverlay');
+const huntTimerEl  = document.getElementById('huntTimer');
+const huntScoreEl  = document.getElementById('huntScore');
+const quillingNotice = document.getElementById('quillingNotice');
+
+// Generate stars
+for (let i = 0; i < 40; i++) {
+  const s = document.createElement('div');
+  s.className = 'star';
+  s.style.left = Math.random() * 100 + '%';
+  s.style.top  = Math.random() * 65 + '%';
+  s.style.opacity = (Math.random() * 0.6 + 0.3).toFixed(2);
+  starsEl.appendChild(s);
+}
+const fireflies = document.querySelectorAll('.firefly');
+
+// ════════════════════════════════
+// NAME SCREEN
+// ════════════════════════════════
+document.getElementById('nameInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') confirmName();
+});
+
+function confirmName() {
+  const val = document.getElementById('nameInput').value.trim().toUpperCase();
+  petName = val || 'SPIKE';
+  petNameLabel.textContent = petName;
+  petLvLabel.textContent   = 'LV.' + level;
+  document.getElementById('nameScreen').style.display = 'none';
+  realTick();
+}
+
+// ════════════════════════════════
+// SCREEN SWITCH
+// ════════════════════════════════
+function switchScreen(idx) {
+  screensTrack.className = idx === 1 ? 'screens-track show-dna' : 'screens-track';
+  document.getElementById('nav-burrow').className = 'nav-btn' + (idx===0?' active':'');
+  document.getElementById('nav-dna').className    = 'nav-btn' + (idx===1?' active':'');
+  actionStrip.style.display = idx === 0 ? 'flex' : 'none';
+}
+
+// ════════════════════════════════
+// QUILL COLOR
+// ════════════════════════════════
+function applyQuillColor(type) {
+  const color = QUILL_COLORS[type];
+  document.querySelectorAll('#hogSvg rect[id^="q"], #hogSvg rect.qbody').forEach(r => r.setAttribute('fill', color));
+  hogSvg.className = type === 'generic' ? '' : type;
+}
+
+// ════════════════════════════════
+// PERSONALITY
+// ════════════════════════════════
+function setPersonality(type) {
+  if (quillingLocked) { showBubble('🔒 QUILLS LOCKED!'); return; }
+  currentPersonality = type;
+  const p = P[type];
+  applyQuillColor(type);
+  dominantName.textContent = p.name;
+  dominantIcon.textContent = p.icon;
+
+  if (type !== 'generic') dna[DNA_KEY[type]] = Math.min(100, dna[DNA_KEY[type]] + 15);
+
+  ['zoomie','zen','chaser','sage'].forEach(t => {
+    document.getElementById('card-'+t).className = 'p-card' + (t===type?' dominant':'');
+  });
+  ['generic','zoomie','zen','chaser','sage'].forEach(t => {
+    const b = document.getElementById('pbtn-'+t);
+    if (b) b.className = 'p-btn' + (t===type?' sel':'');
+  });
+  refreshDNA();
+  showBubble(p.icon + ' ' + p.name + '!');
+}
+
+function refreshDNA() {
+  const total = Object.values(dna).reduce((a,b)=>a+b,0) || 1;
+  const scores = {
+    zoomie: Math.round(dna.protein  / total * 100),
+    zen:    Math.round(dna.pets     / total * 100),
+    chaser: Math.round(dna.scents   / total * 100),
+    sage:   Math.round(dna.solitude / total * 100),
+  };
+  Object.keys(scores).forEach(k => document.getElementById('bar-'+k).style.width = scores[k] + '%');
+  ['protein','pets','scents','solitude'].forEach(k => {
+    document.getElementById('dna-'+k).style.width = dna[k] + '%';
+    document.getElementById('val-'+k).textContent = Math.round(dna[k]);
+  });
+
+  if (!quillingLocked && currentPersonality === 'generic') {
+    const top = Object.keys(scores).reduce((a,b)=>scores[a]>scores[b]?a:b);
+    if (scores[top] > 40) {
+      dominantName.textContent = P[top].name;
+      dominantIcon.textContent = P[top].icon;
+      applyQuillColor(top);
+    } else {
+      dominantName.textContent = 'GENERIC HOG';
+      dominantIcon.textContent = '🦔';
+      applyQuillColor('generic');
+    }
+  }
+}
+
+// ════════════════════════════════
+// XP / LEVEL
+// ════════════════════════════════
+function gainXP(amount) {
+  xp += amount;
+  while (xp >= XP_PER_LEVEL && level < 10) {
+    xp -= XP_PER_LEVEL;
+    level++;
+    triggerLevelUp();
+  }
+  if (level >= 10 && !quillingLocked) {
+    xp = XP_PER_LEVEL; // cap at 10
+    triggerGreatQuilling();
+  }
+  updateXPBar();
+}
+
+function updateXPBar() {
+  const pct = Math.min(100, (xp / XP_PER_LEVEL) * 100);
+  xpBar.style.width = pct + '%';
+  xpLvLabel.textContent = 'LV.' + level;
+  petLvLabel.textContent = 'LV.' + level;
+}
+
+function triggerLevelUp() {
+  lvlFlashTxt.textContent = 'LEVEL UP!';
+  lvlFlashSub.textContent = 'LV.' + level;
+  lvlFlash.className = 'levelup-flash show';
+  setTimeout(() => lvlFlash.className = 'levelup-flash', 2000);
+  showBanner('⭐ LEVEL ' + level + '!');
+}
+
+// ════════════════════════════════
+// GREAT QUILLING
+// ════════════════════════════════
+function triggerGreatQuilling() {
+  // Determine dominant type
+  const total = Object.values(dna).reduce((a,b)=>a+b,0) || 1;
+  const scores = {
+    zoomie: dna.protein/total, zen: dna.pets/total,
+    chaser: dna.scents/total,  sage: dna.solitude/total,
+  };
+  lockedType = Object.keys(scores).reduce((a,b)=>scores[a]>scores[b]?a:b);
+  const lp = P[lockedType];
+
+  document.getElementById('quillingHog').textContent   = lp.icon;
+  document.getElementById('quillingBadge').textContent = lp.name;
+  document.getElementById('quillingSub').innerHTML     = `Your quills are now<br><strong>${lp.name}</strong> forever.`;
+  document.getElementById('quillingOverlay').className = 'show';
+}
+
+function confirmQuilling() {
+  document.getElementById('quillingOverlay').className = '';
+  quillingLocked = true;
+  currentPersonality = lockedType;
+  applyQuillColor(lockedType);
+  dominantName.textContent = P[lockedType].name;
+  dominantIcon.textContent = P[lockedType].icon;
+
+  // Lock DNA buttons
+  document.querySelectorAll('.p-btn').forEach(b => b.disabled = true);
+  document.querySelectorAll('.p-card').forEach(c => c.onclick = null);
+  document.getElementById('card-'+lockedType).className = 'p-card dominant locked';
+  quillingNotice.className = 'quilling-notice show';
+
+  showBanner('🌟 GREAT QUILLING COMPLETE!');
+  lvlFlashTxt.textContent = '✨ EVOLVED!';
+  lvlFlashSub.textContent = P[lockedType].name;
+  lvlFlash.className = 'levelup-flash show';
+  setTimeout(() => lvlFlash.className = 'levelup-flash', 3000);
+}
+
+// ════════════════════════════════
+// ANOINTING
+// ════════════════════════════════
+function anointHog() {
+  const phase = getPhase(currentHour);
+  if (phase !== 'active' && phase !== 'stir') { showBubble('ASLEEP 💤'); return; }
+
+  const scent = SCENTS[Math.floor(Math.random() * SCENTS.length)];
+  // Spawn spray particles on burrow screen
+  const scene = document.querySelector('.scene');
+  for (let i = 0; i < 5; i++) {
+    const el = document.createElement('div');
+    el.className = 'scent-spray';
+    el.textContent = scent;
+    el.style.left  = (30 + Math.random() * 40) + '%';
+    el.style.top   = (20 + Math.random() * 40) + '%';
+    el.style.animationDelay = (i * 0.12) + 's';
+    scene.appendChild(el);
+    setTimeout(() => el.remove(), 1800);
+  }
+
+  dna.scents = Math.min(100, dna.scents + 8);
+  mood = Math.min(100, mood + 6);
+  gainXP(12);
+  refreshDNA();
+  showBubble(scent + ' ANOINTED!');
+  if (!quillingLocked) setPersonality('chaser');
+}
+
+// ════════════════════════════════
+// BUG HUNT
+// ════════════════════════════════
+function startBugHunt() {
+  const phase = getPhase(currentHour);
+  if (phase !== 'active') { showBubble('ACTIVE WINDOW ONLY! 🌙'); return; }
+  if (huntActive) return;
+
+  huntActive = true;
+  huntBugsCount = 0;
+  huntSecondsLeft = 20;
+  bugHuntEl.className = 'active';
+  huntScoreEl.textContent = 'BUGS: 0';
+  updateHuntTimer();
+
+  // Disable other actions during hunt
+  document.getElementById('btnFeed').disabled   = true;
+  document.getElementById('btnPet').disabled    = true;
+  document.getElementById('btnAnoint').disabled = true;
+  document.getElementById('btnHunt').disabled   = true;
+
+  spawnBug();
+  spawnBug();
+
+  huntTimer = setInterval(() => {
+    huntSecondsLeft--;
+    updateHuntTimer();
+    if (huntSecondsLeft <= 0) endBugHunt();
+    // Spawn a new bug every 3s
+    if (huntSecondsLeft % 3 === 0) spawnBug();
+  }, 1000);
+}
+
+function updateHuntTimer() {
+  huntTimerEl.textContent = '0:' + String(huntSecondsLeft).padStart(2,'0');
+}
+
+function spawnBug() {
+  if (!huntActive) return;
+  const scene = document.querySelector('.scene');
+  const bug = document.createElement('div');
+  bug.className = 'bug';
+  bug.textContent = BUGS[Math.floor(Math.random() * BUGS.length)];
+
+  // Keep bugs in the middle of the scene (avoid stat strip and top bar)
+  bug.style.left = (8 + Math.random() * 75) + '%';
+  bug.style.top  = (20 + Math.random() * 45) + '%';
+
+  bug.addEventListener('click', () => catchBug(bug, scene));
+  bug.addEventListener('touchstart', (e) => { e.preventDefault(); catchBug(bug, scene); }, { passive: false });
+  scene.appendChild(bug);
+}
+
+function catchBug(bugEl, scene) {
+  if (!bugEl.parentNode) return;
+  const rect = bugEl.getBoundingClientRect();
+  const sceneRect = scene.getBoundingClientRect();
+
+  // Pop text
+  const pop = document.createElement('div');
+  pop.className = 'bug-catch-txt';
+  pop.textContent = '+XP! 🎯';
+  pop.style.left = (rect.left - sceneRect.left) + 'px';
+  pop.style.top  = (rect.top  - sceneRect.top  - 20) + 'px';
+  scene.appendChild(pop);
+  setTimeout(() => pop.remove(), 900);
+
+  bugEl.remove();
+  huntBugsCount++;
+  huntScoreEl.textContent = 'BUGS: ' + huntBugsCount;
+  dna.protein = Math.min(100, dna.protein + 4);
+  gainXP(8);
+  mood = Math.min(100, mood + 3);
+  refreshDNA();
+
+  // Spawn replacement
+  setTimeout(() => { if (huntActive) spawnBug(); }, 600);
+}
+
+function endBugHunt() {
+  huntActive = false;
+  clearInterval(huntTimer);
+  bugHuntEl.className = '';
+
+  // Clear remaining bugs
+  document.querySelectorAll('.bug').forEach(b => b.remove());
+
+  // Re-enable actions
+  const phase = getPhase(currentHour);
+  const awake = phase === 'active' || phase === 'stir';
+  document.getElementById('btnFeed').disabled   = false;
+  document.getElementById('btnPet').disabled    = false;
+  document.getElementById('btnAnoint').disabled = !awake;
+  document.getElementById('btnHunt').disabled   = phase !== 'active';
+
+  const bonus = huntBugsCount * 5;
+  gainXP(bonus);
+  showBanner('HUNT OVER! ' + huntBugsCount + ' BUGS! +' + bonus + 'XP');
+  refreshDNA();
+}
+
+// ════════════════════════════════
+// PHASE LOGIC
+// ════════════════════════════════
+function getPhase(h) {
+  if (h < 6)  return 'deep';
+  if (h < 15) return 'sleep';
+  if (h < 18) return 'stir';
+  return 'active';
+}
+
+function getSkyColor(h) {
+  const c = {0:'#0d0820',1:'#0d0820',2:'#0d0820',3:'#0d0820',4:'#1a0e30',5:'#2d1a3a',6:'#c87040',7:'#d4904a',8:'#d4b060',9:'#c8a840',10:'#b89830',11:'#b09020',12:'#a88820',13:'#b09028',14:'#b89838',15:'#c8a050',16:'#d49060',17:'#c06040',18:'#8a3020',19:'#3a1a40',20:'#1a0e30',21:'#0d0820',22:'#0d0820',23:'#0d0820'};
+  return c[h] || '#0d0820';
+}
+
+function updateDisplay(hour) {
+  const phase   = getPhase(hour);
+  const isNight = phase === 'active' || phase === 'deep';
+  const isSleep = phase === 'sleep';
+  const isStir  = phase === 'stir';
+  const awake   = isStir || phase === 'active';
+
+  sky.style.background = getSkyColor(hour);
+  sun.style.opacity    = (hour >= 7 && hour < 17) ? '0.9' : '0';
+  moon.style.opacity   = isNight ? '0.9' : (hour < 6 ? '0.7' : '0');
+  starsEl.style.opacity = isNight ? '1' : (hour < 6 ? '0.6' : '0');
+
+  fireflies.forEach(f => {
+    f.style.animationPlayState = isNight ? 'running' : 'paused';
+    f.style.opacity = isNight ? null : '0';
+  });
+
+  hog.className = 'hog-wrap ' + (isSleep ? 'sleeping' : isStir ? 'stirring' : 'active');
+  zzz.style.display = (isSleep || phase === 'deep') ? 'flex' : 'none';
+
+  const eyeRect = document.getElementById('hogEyeRect');
+  if (eyeRect) {
+    if (isSleep || phase === 'deep') { eyeRect.setAttribute('height','1'); eyeRect.setAttribute('y','15'); }
+    else                             { eyeRect.setAttribute('height','3'); eyeRect.setAttribute('y','13'); }
+  }
+
+  const h12 = hour % 12 || 12;
+  clockTime.textContent  = h12 + ':00 ' + (hour < 12 ? 'AM' : 'PM');
+  const phaseNames = { sleep:'💤 SLEEPING', stir:'🌅 STIRRING', active:'🌙 ACTIVE!', deep:'🌙 DEEP SLEEP' };
+  clockPhase.textContent = phaseNames[phase];
+
+  // Enable/disable action buttons by phase
+  if (!huntActive) {
+    document.getElementById('btnAnoint').disabled = !awake;
+    document.getElementById('btnHunt').disabled   = phase !== 'active';
+  }
+
+  // Stat drift
+  if (phase === 'active') {
+    energy = Math.max(20, energy - 0.5);
+    hunger = Math.min(100, hunger + 1);
+    dna.protein = Math.min(100, dna.protein + 0.2);
+  } else {
+    energy = Math.min(100, energy + 0.3);
+    dna.solitude = Math.min(100, dna.solitude + 0.1);
+  }
+
+  moodBar.style.width   = Math.round(mood)   + '%';
+  hungerBar.style.width = Math.round(hunger) + '%';
+  energyBar.style.width = Math.round(energy) + '%';
+
+  refreshDNA();
+}
+
+// ════════════════════════════════
+// INTERACTIONS
+// ════════════════════════════════
+let bannerTimer, bubbleTimer;
+
+function showBanner(text) {
+  clearTimeout(bannerTimer);
+  phaseBanner.textContent = text;
+  phaseBanner.style.opacity = '1';
+  bannerTimer = setTimeout(() => phaseBanner.style.opacity = '0', 2800);
+}
+
+function showBubble(text) {
+  clearTimeout(bubbleTimer);
+  tapBubble.textContent = text;
+  tapBubble.style.opacity = '1';
+  bubbleTimer = setTimeout(() => tapBubble.style.opacity = '0', 1200);
+}
+
+function tapHog() {
+  if (huntActive) return;
+  const phase = getPhase(currentHour);
+  const p = P[currentPersonality];
+  const awake = phase === 'active' || phase === 'stir';
+  showBubble((awake ? p.active : p.sleep)[tapCount % (awake ? p.active : p.sleep).length]);
+
+  if (awake) {
+    mood = Math.min(100, mood + 5);
+    dna.pets = Math.min(100, dna.pets + 2);
+    gainXP(5);
+  } else {
+    if (tapCount > 2) showBanner(petName + ' NEEDS REST!');
+  }
+  tapCount++;
+  hog.style.transform = 'translateX(-50%) scale(1.12)';
+  setTimeout(() => hog.style.transform = '', 150);
+  refreshDNA();
+}
+
+function feedHog() {
+  if (huntActive) return;
+  const phase = getPhase(currentHour);
+  if (phase === 'active' || phase === 'stir') {
+    showBubble('NOM NOM! 🍖');
+    hunger = Math.max(0, hunger - 20);
+    mood   = Math.min(100, mood + 8);
+    dna.protein = Math.min(100, dna.protein + 5);
+    gainXP(10);
+    refreshDNA();
+  } else {
+    showBubble('...zzz 💤');
+  }
+}
+
+// ════════════════════════════════
+// SLIDER
+// ════════════════════════════════
+slider.addEventListener('input', () => {
+  const prev = getPhase(currentHour);
+  currentHour = parseInt(slider.value);
+  const next  = getPhase(currentHour);
+  if (prev !== next) {
+    const b = { stir:'⭐ ' + petName + ' IS STIRRING...', active:'🌙 ACTIVE WINDOW BEGINS!', sleep:'💤 ' + petName + ' IS SLEEPING', deep:'🌙 DEEP SLEEP MODE' };
+    showBanner(b[next]);
+  }
+  updateDisplay(currentHour);
+});
+
+// ════════════════════════════════
+// TICK
+// ════════════════════════════════
+function realTick() {
+  currentHour = new Date().getHours();
+  slider.value = currentHour;
+  updateDisplay(currentHour);
+}
+setInterval(realTick, 60000);
+// Don't auto-start — wait for name confirmation
+</script>
+</body>
+</html>
