@@ -287,10 +287,201 @@
   .action-btn.hunt   { background:var(--zoomie); color:var(--highlight); }
   .action-btn:active { filter:brightness(1.2); }
   .action-btn:disabled { opacity:.35; cursor:default; filter:none; }
+  /* ── MUTE BUTTON ── */
+  .mute-btn {
+    background: none; border: 1px solid var(--amber-dark);
+    color: var(--amber); font-size: 14px; width: 28px; height: 28px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; touch-action: manipulation; border-radius: 2px;
+  }
+  .mute-btn.muted { opacity: 0.4; }
+
+  /* ── RUNAWAY SCREEN ── */
+  #runawayScreen {
+    position: fixed; inset: 0; z-index: 700;
+    background: var(--soil);
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    gap: 20px; padding: 32px; text-align: center;
+  }
+  #runawayScreen.show { display: flex; }
+  .runaway-emoji { font-size: 56px; animation: runawayShake 0.4s steps(2) infinite; }
+  @keyframes runawayShake { 0%{transform:translateX(-6px)} 100%{transform:translateX(6px)} }
+  .runaway-title { font-size: 12px; color: #ff6644; line-height: 1.8; }
+  .runaway-sub   { font-size: 7px; color: var(--cream); opacity: .7; line-height: 2; }
+  .runaway-btn   { font-family:'Press Start 2P',monospace; font-size: 9px; background: var(--amber); color: var(--soil); border: none; padding: 14px 28px; cursor: pointer; box-shadow: 0 4px 0 var(--amber-dark); }
+
+  /* ── HOMIE CARD MODAL ── */
+  #cardModal {
+    position: fixed; inset: 0; z-index: 600;
+    background: rgba(0,0,0,0.85);
+    display: none; flex-direction: column; align-items: center; justify-content: center;
+    gap: 16px; padding: 24px;
+  }
+  #cardModal.show { display: flex; }
+  #homieCanvas { border: 3px solid var(--amber); image-rendering: pixelated; max-width: 100%; }
+  .card-btns { display: flex; gap: 10px; }
+  .card-btn {
+    font-family:'Press Start 2P',monospace; font-size: 8px;
+    padding: 10px 16px; border: none; cursor: pointer; touch-action: manipulation;
+  }
+  .card-btn.download { background: var(--amber); color: var(--soil); }
+  .card-btn.close    { background: var(--brown-light); color: var(--cream); }
+
+  /* ── IDLE PERSONALITY ANIMATIONS ── */
+  .idle-particle {
+    position: absolute; pointer-events: none; z-index: 15;
+    font-size: 18px; opacity: 0; animation: idleFloat 1.8s ease-out forwards;
+  }
+  @keyframes idleFloat {
+    0%  { opacity: 0; transform: translate(0,0) scale(0.6); }
+    20% { opacity: 1; }
+    100%{ opacity: 0; transform: translate(var(--dx,0px), -70px) scale(1.1); }
+  }
+
+  .zoomie-streak {
+    position: absolute; pointer-events: none; z-index: 15;
+    font-size: 26px;
+    animation: zoomieRun 1.2s steps(8) forwards;
+  }
+  @keyframes zoomieRun {
+    0%  { left: -10%; opacity: 1; }
+    100%{ left: 110%; opacity: 0.2; }
+  }
+
+  /* Artifact find bubble */
+  .artifact-find {
+    position: absolute; pointer-events: none; z-index: 20;
+    font-size: 10px; color: var(--highlight); background: var(--soil);
+    border: 2px solid var(--sage); padding: 5px 9px;
+    animation: artifactPop 2.5s ease-out forwards;
+    white-space: nowrap;
+  }
+  @keyframes artifactPop {
+    0%  { opacity: 0; transform: translateY(0) scale(0.8); }
+    15% { opacity: 1; transform: translateY(-8px) scale(1); }
+    75% { opacity: 1; }
+    100%{ opacity: 0; transform: translateY(-30px) scale(0.9); }
+  }
+
+  /* ── STAT CONSEQUENCE INDICATORS ── */
+  .stat-fill.danger  { background: #e84040 !important; }
+  .stat-fill.warning { background: #e8a020 !important; }
+  .stat-fill.great   { background: #40c840 !important; }
+
+  .stat-warn {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    font-size: 9px; color: #ff4040; background: rgba(61,40,0,.92);
+    border: 2px solid #ff4040; padding: 6px 12px; white-space: nowrap;
+    z-index: 25; pointer-events: none; opacity: 0; transition: opacity .3s;
+    text-align: center; line-height: 1.8;
+  }
+  .stat-warn.show { opacity: 1; }
+
+  /* Neglect sulk */
+  #hogSvg.sulking { filter: drop-shadow(0 0 10px #ff3300) drop-shadow(0 4px 8px rgba(0,0,0,.4)) sepia(0.4); }
+
+  /* ── HANG / PARK SCREEN ── */
+  .hang-panel { width:50%; height:100%; display:flex; flex-direction:column; background:#7aaa44; }
+  .hang-scene { flex:1; position:relative; overflow:hidden; }
+
+  /* Park sky */
+  .park-sky  { position:absolute; inset:0; background:#87ceeb; transition:background 2s; }
+  .park-stars{ position:absolute; inset:0; opacity:0; transition:opacity 2s; }
+  .park-sun  { position:absolute; top:14px; right:20px; width:36px; height:36px; background:#ffe066; border-radius:50%; box-shadow:0 0 18px #ffe066; opacity:.9; transition:opacity 2s; }
+  .park-moon { position:absolute; top:14px; right:20px; width:28px; height:28px; background:#f5ead0; border-radius:50%; box-shadow:0 0 10px #e8d9b0; opacity:0; transition:opacity 2s; }
+
+  /* Clouds */
+  .cloud { position:absolute; width:60px; height:22px; background:rgba(255,255,255,.8); border-radius:20px; animation:cloudDrift 18s ease-in-out infinite; }
+  .cloud::before { content:''; position:absolute; top:-10px; left:10px; width:36px; height:28px; background:rgba(255,255,255,.8); border-radius:50%; }
+  .cloud::after  { content:''; position:absolute; top:-6px;  left:28px; width:24px; height:22px; background:rgba(255,255,255,.8); border-radius:50%; }
+  @keyframes cloudDrift { 0%,100%{transform:translateX(0)} 50%{transform:translateX(12px)} }
+
+  /* Park trees */
+  .park-tree  { position:absolute; bottom:52px; }
+  .ptree-trunk{ width:14px; height:28px; background:#5c3d0a; margin:0 auto; }
+  .ptree-top  { width:44px; height:52px; background:#2d6614; clip-path:polygon(50% 0%,0% 100%,100% 100%); margin-bottom:-8px; }
+  .ptree-top2 { width:56px; height:40px; background:#3a7a1e; clip-path:polygon(50% 0%,0% 100%,100% 100%); margin:0 auto; margin-bottom:-4px; }
+
+  /* Pond */
+  .pond { position:absolute; bottom:52px; left:50%; transform:translateX(-50%); width:100px; height:36px; background:#4a9abf; border-radius:50%; opacity:.75; overflow:visible; }
+  .pond-shine { position:absolute; top:6px; left:12px; width:20px; height:6px; background:rgba(255,255,255,.4); border-radius:50%; transform:rotate(-20deg); }
+  .pond-lily  { position:absolute; left:20%; top:30%; font-size:12px; }
+
+  /* Ground */
+  .park-ground { position:absolute; bottom:0; left:0; right:0; }
+  .park-grass  { height:52px; background:#5c9a28; position:relative; }
+  .park-grass::before { content:''; position:absolute; top:-6px; left:0; right:0; height:8px; background:repeating-linear-gradient(90deg,#5c9a28 0,#5c9a28 8px,#4a8020 8px,#4a8020 12px,#6aaa30 12px,#6aaa30 16px,#5c9a28 16px,#5c9a28 24px); }
+  .park-path   { height:12px; background:#c8b060; border-top:3px solid #b09040; }
+
+  /* Park fireflies */
+  .park-firefly { position:absolute; width:4px; height:4px; background:#d4ff00; border-radius:50%; opacity:0; box-shadow:0 0 5px #d4ff00; animation:flyAround 7s ease-in-out infinite; }
+
+  /* Two hedgehog layout */
+  .hang-hogs { position:absolute; bottom:64px; left:0; right:0; display:flex; align-items:flex-end; justify-content:space-around; padding:0 8px; }
+
+  .hang-hog-slot { display:flex; flex-direction:column; align-items:center; gap:3px; position:relative; }
+  .hang-svg { transition:filter .6s; filter:drop-shadow(0 3px 6px rgba(0,0,0,.35)); }
+  .hang-svg.waiting { filter:grayscale(.8) opacity(.45) drop-shadow(0 3px 6px rgba(0,0,0,.2)); }
+
+  .hang-hog-name { font-size:7px; color:var(--soil); background:rgba(232,217,176,.9); padding:2px 6px; border:1px solid var(--amber-dark); white-space:nowrap; max-width:90px; overflow:hidden; text-overflow:ellipsis; }
+  .hang-hog-lv   { font-family:'VT323',monospace; font-size:13px; color:var(--amber-dark); }
+
+  .hang-score-badge { font-size:10px; color:var(--highlight); background:var(--soil); border:2px solid var(--amber); padding:2px 8px; min-width:32px; text-align:center; opacity:0; transition:opacity .3s; }
+  .hang-score-badge.show { opacity:1; }
+
+  .hang-center { display:flex; flex-direction:column; align-items:center; justify-content:flex-end; padding-bottom:8px; min-width:40px; }
+  .hang-hearts { font-size:16px; min-height:24px; }
+
+  /* Hang status */
+  .hang-status { position:absolute; top:10px; left:50%; transform:translateX(-50%); font-size:7px; color:var(--soil); background:rgba(232,217,176,.9); border:2px solid var(--amber-dark); padding:5px 10px; white-space:nowrap; text-align:center; }
+
+  .hang-timer-box { position:absolute; top:10px; left:50%; transform:translateX(-50%); text-align:center; background:rgba(61,40,0,.88); border:2px solid var(--amber); padding:5px 14px; }
+  .hang-timer-lbl { font-size:14px; color:var(--amber); }
+  .hang-combined  { font-size:8px; color:var(--cream); margin-top:2px; }
+
+  /* Hang controls */
+  .hang-controls { display:flex; gap:0; background:rgba(61,40,0,.88); border-top:2px solid var(--amber-dark); flex-shrink:0; }
+  .hang-btn { flex:1; font-family:'Press Start 2P',monospace; font-size:8px; padding:12px 6px; border:none; border-right:1px solid rgba(184,134,11,.3); cursor:pointer; touch-action:manipulation; text-align:center; line-height:1.4; }
+  .hang-btn:last-child { border-right:none; }
+  .hang-btn.invite   { background:var(--amber); color:var(--soil); }
+  .hang-btn.hunt-btn { background:var(--zoomie); color:var(--highlight); }
+  .hang-btn.end-btn  { background:var(--brown); color:var(--cream); }
+  .hang-btn:active   { filter:brightness(1.2); }
+
+  /* Hang bug */
+  .hang-bug { position:absolute; font-size:24px; cursor:pointer; animation:bugWiggle .3s steps(2) infinite; touch-action:manipulation; z-index:41; }
+
+  /* Copied toast */
+  .copy-toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); font-size:8px; color:var(--highlight); background:var(--soil); border:2px solid var(--amber); padding:8px 16px; z-index:200; opacity:0; transition:opacity .3s; white-space:nowrap; pointer-events:none; }
+  .copy-toast.show { opacity:1; }
+
+  /* Screens track now has 3 panels */
+  .screens-track { display:flex; width:300%; height:100%; transition:transform .3s steps(6); }
+  .screens-track.show-dna  { transform:translateX(-33.333%); }
+  .screens-track.show-hang { transform:translateX(-66.666%); }
+  .screen-panel { width:33.333%; height:100%; position:relative; overflow:hidden; }
+  .dna-screen   { width:33.333%; }
 </style>
 </head>
 <body>
 <div id="app">
+
+  <!-- ══ RUNAWAY SCREEN ══ -->
+  <div id="runawayScreen">
+    <div class="runaway-emoji">💨🦔</div>
+    <div class="runaway-title">YOUR HOMIE<br>RAN AWAY!</div>
+    <div class="runaway-sub" id="runawayMsg">They needed you and you weren't there.<br>Start fresh with a new Homie?</div>
+    <button class="runaway-btn" onclick="resetGame()">► START OVER</button>
+  </div>
+
+  <!-- ══ HOMIE CARD MODAL ══ -->
+  <div id="cardModal">
+    <canvas id="homieCanvas" width="320" height="200"></canvas>
+    <div class="card-btns">
+      <button class="card-btn download" onclick="downloadCard()">⬇ SAVE IMAGE</button>
+      <button class="card-btn close"    onclick="closeCard()">✕ CLOSE</button>
+    </div>
+  </div>
 
   <!-- ══ NAME SCREEN ══ -->
   <div id="nameScreen">
@@ -330,6 +521,7 @@
         <div class="clock-time" id="clockTime">--:--</div>
         <div class="clock-phase" id="clockPhase">...</div>
       </div>
+      <button class="mute-btn" id="muteBtn" onclick="toggleMute()" title="Toggle sound">🔊</button>
     </div>
   </div>
 
@@ -433,6 +625,8 @@
             <div class="levelup-sub" id="lvlFlashSub">LV.2</div>
           </div>
 
+          <div class="stat-warn" id="statWarn"></div>
+
           <div class="phase-banner" id="phaseBanner"></div>
           <div class="tap-bubble"   id="tapBubble"></div>
 
@@ -500,6 +694,98 @@
         </div>
       </div>
 
+      <!-- HANG SCREEN -->
+      <div class="screen-panel hang-panel" id="hangPanel">
+        <div class="hang-scene" id="hangScene">
+          <div class="park-sky" id="parkSky"></div>
+          <div class="park-stars" id="parkStars"></div>
+          <div class="park-sun"  id="parkSun"></div>
+          <div class="park-moon" id="parkMoon"></div>
+          <div class="cloud" style="top:10%;left:6%"></div>
+          <div class="cloud" style="top:16%;left:52%;transform:scale(.7);animation-delay:5s"></div>
+          <div class="park-tree" style="left:2%"><div class="ptree-top"></div><div class="ptree-top2"></div><div class="ptree-trunk"></div></div>
+          <div class="park-tree" style="left:16%;transform:scale(.75);transform-origin:bottom"><div class="ptree-top"></div><div class="ptree-top2"></div><div class="ptree-trunk"></div></div>
+          <div class="park-tree" style="right:4%"><div class="ptree-top"></div><div class="ptree-top2"></div><div class="ptree-trunk"></div></div>
+          <div class="park-tree" style="right:18%;transform:scale(.8);transform-origin:bottom"><div class="ptree-top"></div><div class="ptree-top2"></div><div class="ptree-trunk"></div></div>
+          <div class="pond"><div class="pond-shine"></div><div class="pond-lily">🌸</div><div class="pond-lily" style="left:62%;top:38%">🌸</div></div>
+          <div class="park-ground"><div class="park-grass"></div><div class="park-path"></div></div>
+          <div class="park-firefly" style="left:12%;top:42%;animation-delay:1s"></div>
+          <div class="park-firefly" style="left:72%;top:36%;animation-delay:3.4s"></div>
+          <div class="park-firefly" style="left:48%;top:52%;animation-delay:5.2s"></div>
+          <div id="hangBugLayer"></div>
+
+          <div class="hang-hogs">
+            <!-- LEFT HOG (you) -->
+            <div class="hang-hog-slot" id="hangSlotLeft">
+              <svg class="hang-svg" id="hangSvgLeft" viewBox="0 0 32 24" width="96" height="72" style="image-rendering:pixelated;overflow:visible">
+                <rect class="hql" x="3" y="10" width="2" height="2" fill="#7a5c00"/><rect class="hql" x="2" y="8" width="2" height="2" fill="#7a5c00"/>
+                <rect class="hql" x="4" y="6" width="2" height="2" fill="#7a5c00"/><rect class="hql" x="7" y="4" width="2" height="2" fill="#7a5c00"/>
+                <rect class="hql" x="10" y="3" width="2" height="2" fill="#7a5c00"/><rect class="hql" x="13" y="2" width="2" height="2" fill="#7a5c00"/>
+                <rect class="hql" x="16" y="3" width="2" height="2" fill="#7a5c00"/><rect class="hql" x="19" y="4" width="2" height="2" fill="#7a5c00"/>
+                <rect class="hql" x="21" y="6" width="2" height="2" fill="#7a5c00"/><rect class="hql" x="22" y="8" width="2" height="2" fill="#7a5c00"/>
+                <rect class="hql" x="22" y="11" width="2" height="2" fill="#7a5c00"/>
+                <rect class="hql" x="4" y="8" width="18" height="2" fill="#7a5c00"/><rect class="hql" x="3" y="10" width="20" height="2" fill="#7a5c00"/>
+                <rect class="hql" x="3" y="12" width="19" height="2" fill="#7a5c00"/><rect class="hql" x="4" y="14" width="17" height="2" fill="#7a5c00"/>
+                <rect class="hql" x="6" y="16" width="14" height="2" fill="#7a5c00"/><rect class="hql" x="5" y="6" width="16" height="2" fill="#7a5c00"/>
+                <rect x="6" y="9" width="1" height="5" fill="rgba(0,0,0,0.18)"/><rect x="9" y="7" width="1" height="7" fill="rgba(0,0,0,0.18)"/>
+                <rect x="12" y="6" width="1" height="8" fill="rgba(0,0,0,0.18)"/><rect x="15" y="6" width="1" height="8" fill="rgba(0,0,0,0.18)"/>
+                <rect x="18" y="7" width="1" height="7" fill="rgba(0,0,0,0.18)"/><rect x="21" y="9" width="1" height="5" fill="rgba(0,0,0,0.18)"/>
+                <rect x="5" y="17" width="16" height="2" fill="#c8a060"/><rect x="7" y="19" width="12" height="2" fill="#c8a060"/>
+                <rect x="22" y="12" width="6" height="5" fill="#c8a060"/><rect x="23" y="11" width="5" height="2" fill="#c8a060"/>
+                <rect x="27" y="13" width="3" height="3" fill="#d4b070"/><rect x="29" y="13" width="2" height="2" fill="#3a1800"/>
+                <rect x="25" y="13" width="3" height="3" fill="#1a0a00"/><rect x="25" y="13" width="1" height="1" fill="#ffffff"/>
+                <rect x="8" y="21" width="3" height="2" fill="#7a5c2a"/><rect x="13" y="21" width="3" height="2" fill="#7a5c2a"/>
+                <rect x="18" y="21" width="3" height="2" fill="#7a5c2a"/><rect x="3" y="16" width="2" height="2" fill="#c8a060"/>
+              </svg>
+              <div class="hang-hog-name" id="hangNameLeft">YOU</div>
+              <div class="hang-hog-lv"   id="hangLvLeft">LV.1</div>
+              <div class="hang-score-badge" id="hangScoreLeft">0</div>
+            </div>
+
+            <div class="hang-center"><div class="hang-hearts" id="hangHearts"></div></div>
+
+            <!-- RIGHT HOG (friend) -->
+            <div class="hang-hog-slot friend-slot" id="hangSlotRight">
+              <svg class="hang-svg" id="hangSvgRight" viewBox="0 0 32 24" width="96" height="72" style="image-rendering:pixelated;overflow:visible;transform:scaleX(-1)">
+                <rect class="hqr" x="3" y="10" width="2" height="2" fill="#7a5c00"/><rect class="hqr" x="2" y="8" width="2" height="2" fill="#7a5c00"/>
+                <rect class="hqr" x="4" y="6" width="2" height="2" fill="#7a5c00"/><rect class="hqr" x="7" y="4" width="2" height="2" fill="#7a5c00"/>
+                <rect class="hqr" x="10" y="3" width="2" height="2" fill="#7a5c00"/><rect class="hqr" x="13" y="2" width="2" height="2" fill="#7a5c00"/>
+                <rect class="hqr" x="16" y="3" width="2" height="2" fill="#7a5c00"/><rect class="hqr" x="19" y="4" width="2" height="2" fill="#7a5c00"/>
+                <rect class="hqr" x="21" y="6" width="2" height="2" fill="#7a5c00"/><rect class="hqr" x="22" y="8" width="2" height="2" fill="#7a5c00"/>
+                <rect class="hqr" x="22" y="11" width="2" height="2" fill="#7a5c00"/>
+                <rect class="hqr" x="4" y="8" width="18" height="2" fill="#7a5c00"/><rect class="hqr" x="3" y="10" width="20" height="2" fill="#7a5c00"/>
+                <rect class="hqr" x="3" y="12" width="19" height="2" fill="#7a5c00"/><rect class="hqr" x="4" y="14" width="17" height="2" fill="#7a5c00"/>
+                <rect class="hqr" x="6" y="16" width="14" height="2" fill="#7a5c00"/><rect class="hqr" x="5" y="6" width="16" height="2" fill="#7a5c00"/>
+                <rect x="6" y="9" width="1" height="5" fill="rgba(0,0,0,0.18)"/><rect x="9" y="7" width="1" height="7" fill="rgba(0,0,0,0.18)"/>
+                <rect x="12" y="6" width="1" height="8" fill="rgba(0,0,0,0.18)"/><rect x="15" y="6" width="1" height="8" fill="rgba(0,0,0,0.18)"/>
+                <rect x="18" y="7" width="1" height="7" fill="rgba(0,0,0,0.18)"/><rect x="21" y="9" width="1" height="5" fill="rgba(0,0,0,0.18)"/>
+                <rect x="5" y="17" width="16" height="2" fill="#c8a060"/><rect x="7" y="19" width="12" height="2" fill="#c8a060"/>
+                <rect x="22" y="12" width="6" height="5" fill="#c8a060"/><rect x="23" y="11" width="5" height="2" fill="#c8a060"/>
+                <rect x="27" y="13" width="3" height="3" fill="#d4b070"/><rect x="29" y="13" width="2" height="2" fill="#3a1800"/>
+                <rect x="25" y="13" width="3" height="3" fill="#1a0a00"/><rect x="25" y="13" width="1" height="1" fill="#ffffff"/>
+                <rect x="8" y="21" width="3" height="2" fill="#7a5c2a"/><rect x="13" y="21" width="3" height="2" fill="#7a5c2a"/>
+                <rect x="18" y="21" width="3" height="2" fill="#7a5c2a"/><rect x="3" y="16" width="2" height="2" fill="#c8a060"/>
+              </svg>
+              <div class="hang-hog-name" id="hangNameRight">???</div>
+              <div class="hang-hog-lv"   id="hangLvRight">WAITING...</div>
+              <div class="hang-score-badge" id="hangScoreRight">0</div>
+            </div>
+          </div>
+
+          <div class="hang-status" id="hangStatus">INVITE A FRIEND TO HANG!</div>
+          <div class="hang-timer-box" id="hangTimerBox" style="display:none">
+            <div class="hang-timer-lbl" id="hangTimerLbl">0:30</div>
+            <div class="hang-combined"  id="hangCombined">🐛 0</div>
+          </div>
+        </div>
+
+        <div class="hang-controls">
+          <button class="hang-btn invite"   id="hangInviteBtn" onclick="inviteFriend()">📲 INVITE FRIEND</button>
+          <button class="hang-btn hunt-btn" id="hangHuntBtn"   onclick="startHangHunt()" style="display:none">🐛 HANG HUNT</button>
+          <button class="hang-btn end-btn"  id="hangEndBtn"    onclick="endHangHunt()"   style="display:none">✕ END HUNT</button>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -515,6 +801,8 @@
   <div class="bottom-nav">
     <button class="nav-btn active" id="nav-burrow" onclick="switchScreen(0)"><div class="nav-icon">🏠</div><div class="nav-label">BURROW</div></button>
     <button class="nav-btn"        id="nav-dna"    onclick="switchScreen(1)"><div class="nav-icon">🧬</div><div class="nav-label">HOG-DNA</div></button>
+    <button class="nav-btn"        id="nav-hang"   onclick="switchScreen(2)"><div class="nav-icon">🌿</div><div class="nav-label">HANG</div></button>
+    <button class="nav-btn"        id="nav-card"   onclick="showCard()"><div class="nav-icon">🪪</div><div class="nav-label">CARD</div></button>
   </div>
 
 </div><!-- /app -->
@@ -530,13 +818,17 @@ let tapCount = 0;
 let currentPersonality = 'generic';
 let quillingLocked = false;
 let lockedType = null;
+let lastSeen = Date.now();
+let daysAlive = 1;
+let isMuted = false;
+let runawayTriggered = false;
 
 let dna = { protein: 30, pets: 20, scents: 10, solitude: 40 };
 
 // XP / Level
 let xp = 0;
 let level = 1;
-const XP_PER_LEVEL = 100; // flat for prototype
+const XP_PER_LEVEL = 100;
 
 // Bug Hunt
 let huntActive = false;
@@ -544,8 +836,8 @@ let huntBugsCount = 0;
 let huntTimer = null;
 let huntSecondsLeft = 20;
 const BUGS = ['🐛','🦟','🪲','🦗','🐜'];
-
 const SCENTS = ['🌹','🌿','🍋','🌺','🍄','🌊'];
+const ARTIFACTS = ['📿','🪨','🍂','🪵','🐚','🦷','🪶','💎'];
 
 // ════════════════════════════════
 // PERSONALITY DEFS
@@ -629,18 +921,25 @@ function confirmName() {
   petLvLabel.textContent   = 'LV.' + level;
   document.getElementById('nameScreen').style.display = 'none';
   SFX.click();
+  lastSeen = Date.now();
+  daysAlive = 1;
   saveGame();
   realTick();
+  scheduleIdle();
 }
 
 // ════════════════════════════════
 // SCREEN SWITCH
 // ════════════════════════════════
 function switchScreen(idx) {
-  screensTrack.className = idx === 1 ? 'screens-track show-dna' : 'screens-track';
-  document.getElementById('nav-burrow').className = 'nav-btn' + (idx===0?' active':'');
-  document.getElementById('nav-dna').className    = 'nav-btn' + (idx===1?' active':'');
+  const track = document.getElementById('screensTrack');
+  track.className = idx === 1 ? 'screens-track show-dna' : idx === 2 ? 'screens-track show-hang' : 'screens-track';
+  ['burrow','dna','hang'].forEach((id, i) => {
+    const btn = document.getElementById('nav-'+id);
+    if (btn) btn.className = 'nav-btn' + (i===idx?' active':'');
+  });
   actionStrip.style.display = idx === 0 ? 'flex' : 'none';
+  if (idx === 2) initHangScreen();
 }
 
 // ════════════════════════════════
@@ -708,7 +1007,7 @@ function refreshDNA() {
 // XP / LEVEL
 // ════════════════════════════════
 function gainXP(amount) {
-  xp += amount;
+  xp += Math.round(amount * xpMultiplier());
   while (xp >= XP_PER_LEVEL && level < 10) {
     xp -= XP_PER_LEVEL;
     level++;
@@ -982,6 +1281,7 @@ function updateDisplay(hour) {
   energyBar.style.width = Math.round(energy) + '%';
 
   refreshDNA();
+  checkStatConsequences();
 }
 
 // ════════════════════════════════
@@ -1019,6 +1319,7 @@ function tapHog() {
     if (tapCount > 2) showBanner(petName + ' NEEDS REST!');
   }
   tapCount++;
+  lastSeen = Date.now();
   hog.style.transform = 'translateX(-50%) scale(1.12)';
   setTimeout(() => hog.style.transform = '', 150);
   refreshDNA();
@@ -1035,6 +1336,9 @@ function feedHog() {
     mood   = Math.min(100, mood + 8);
     dna.protein = Math.min(100, dna.protein + 5);
     gainXP(10);
+    lastSeen = Date.now();
+    // Clear sulking if recovered
+    if (hunger < 60 && mood > 40) hogSvg.classList.remove('sulking');
     refreshDNA();
     saveGame();
   } else {
@@ -1198,7 +1502,7 @@ function saveGame() {
       petName, level, xp, mood, hunger, energy,
       dna: { ...dna },
       currentPersonality, quillingLocked, lockedType,
-      tapCount,
+      tapCount, lastSeen: Date.now(), daysAlive, isMuted,
     };
     localStorage.setItem(SAVE_KEY, JSON.stringify(state));
   } catch(e) {}
@@ -1220,23 +1524,27 @@ function loadGame() {
     quillingLocked    = s.quillingLocked    || false;
     lockedType        = s.lockedType        || null;
     tapCount          = s.tapCount          || 0;
+    lastSeen          = s.lastSeen          || Date.now();
+    daysAlive         = s.daysAlive         || 1;
+    isMuted           = s.isMuted           || false;
     return !!petName;
   } catch(e) { return false; }
 }
 
 function restoreUI() {
-  // Top bar
   petNameLabel.textContent = petName;
   petLvLabel.textContent   = 'LV.' + level;
   updateXPBar();
-
-  // Quill color
   applyQuillColor(quillingLocked ? lockedType : currentPersonality);
-
-  // DNA panel
   refreshDNA();
 
-  // Quilling lock state
+  // Mute button state
+  const muteBtn = document.getElementById('muteBtn');
+  if (muteBtn) {
+    muteBtn.textContent = isMuted ? '🔇' : '🔊';
+    muteBtn.className   = 'mute-btn' + (isMuted ? ' muted' : '');
+  }
+
   if (quillingLocked) {
     document.querySelectorAll('.p-btn').forEach(b => b.disabled = true);
     document.querySelectorAll('.p-card').forEach(c => c.onclick = null);
@@ -1245,7 +1553,6 @@ function restoreUI() {
     dominantName.textContent = P[lockedType].name;
     dominantIcon.textContent = P[lockedType].icon;
   } else {
-    // Highlight correct personality buttons
     ['generic','zoomie','zen','chaser','sage'].forEach(t => {
       const b = document.getElementById('pbtn-'+t);
       if (b) b.className = 'p-btn' + (t===currentPersonality?' sel':'');
@@ -1257,8 +1564,544 @@ function restoreUI() {
   }
 }
 
+// Also start idle and auto-save after confirmName — patched below in original function
+
 // Auto-save every 15 seconds and on key interactions
 setInterval(saveGame, 15000);
+
+// ════════════════════════════════
+// MUTE TOGGLE
+// ════════════════════════════════
+function toggleMute() {
+  isMuted = !isMuted;
+  const btn = document.getElementById('muteBtn');
+  btn.textContent = isMuted ? '🔇' : '🔊';
+  btn.className   = 'mute-btn' + (isMuted ? ' muted' : '');
+  saveGame();
+}
+
+// Wrap SFX so mute is respected
+const _SFX = new Proxy(SFX, {
+  get(target, key) {
+    return (...args) => { if (!isMuted) target[key](...args); };
+  }
+});
+// Replace SFX calls with mute-aware version
+Object.keys(SFX).forEach(k => { SFX[k] = (...a) => { if (!isMuted) _SFX[k](...a); }; });
+
+// ════════════════════════════════
+// NEGLECT SYSTEM
+// ════════════════════════════════
+function checkNeglect() {
+  const now = Date.now();
+  const hoursGone = (now - lastSeen) / 3600000;
+
+  if (hoursGone < 1) return; // under 1 hour — no penalty
+
+  // Decay stats proportional to absence
+  const decayMood   = Math.min(hoursGone * 3, 60);
+  const decayHunger = Math.min(hoursGone * 4, 80); // hunger goes UP with neglect
+
+  mood   = Math.max(0,   mood - decayMood);
+  hunger = Math.min(100, hunger + decayHunger);
+  energy = hoursGone > 8 ? Math.max(20, energy - 20) : energy;
+
+  // Update days alive
+  const daysGone = Math.floor(hoursGone / 24);
+  daysAlive = Math.max(1, daysAlive + Math.floor((now - lastSeen) / 86400000));
+
+  // 48hr+ → runaway
+  if (hoursGone >= 48 && !runawayTriggered && !quillingLocked) {
+    runawayTriggered = true;
+    triggerRunaway();
+    return;
+  }
+
+  // 24hr+ → sulk mode
+  if (hoursGone >= 24) {
+    hogSvg.classList.add('sulking');
+    showBanner('😢 ' + petName + ' MISSED YOU...');
+    playTone(220, 0.3, 'sine', 0.08);
+  } else if (hoursGone >= 4) {
+    showBanner('😟 ' + petName + ' IS HUNGRY!');
+  }
+
+  lastSeen = now;
+  saveGame();
+}
+
+function triggerRunaway() {
+  document.getElementById('runawayMsg').textContent =
+    petName + ' needed you and you weren\'t there.\nStart fresh with a new Homie?';
+  document.getElementById('runawayScreen').className = 'show';
+  SFX.huntEnd(); // sad descending
+}
+
+function resetGame() {
+  localStorage.removeItem(SAVE_KEY);
+  location.reload();
+}
+
+// ════════════════════════════════
+// STAT CONSEQUENCES
+// ════════════════════════════════
+let statWarnTimer = null;
+
+function checkStatConsequences() {
+  const warn = document.getElementById('statWarn');
+  const mBar = document.getElementById('moodBar');
+  const hBar = document.getElementById('hungerBar');
+  const eBar = document.getElementById('energyBar');
+
+  // Color-code bars
+  mBar.className = 'stat-fill' + (mood < 20 ? ' danger' : mood < 40 ? ' warning' : mood > 80 ? ' great' : '');
+  hBar.className = 'stat-fill' + (hunger > 80 ? ' danger' : hunger > 60 ? ' warning' : hunger < 20 ? ' great' : '');
+  eBar.className = 'stat-fill' + (energy < 20 ? ' danger' : energy < 40 ? ' warning' : energy > 80 ? ' great' : '');
+
+  // Warn messages — priority order
+  let msg = '';
+  if (hunger > 80)    msg = '🍖 STARVING!\nXP HALVED';
+  else if (mood < 20) msg = '😢 TOO SAD\nHUNT LOCKED';
+  else if (mood > 85 && hunger < 25 && energy > 75) {
+    // All stats great — bonus sparkle
+    msg = '✨ THRIVING!\n+BONUS XP';
+    spawnIdleParticles(['✨','⭐','💛'], 6);
+    gainXP(5);
+  }
+
+  if (msg && !huntActive) {
+    warn.textContent = msg;
+    warn.className = 'stat-warn show';
+    clearTimeout(statWarnTimer);
+    statWarnTimer = setTimeout(() => warn.className = 'stat-warn', 2500);
+  }
+
+  // Disable hunt if mood too low
+  if (!huntActive) {
+    document.getElementById('btnHunt').disabled =
+      getPhase(currentHour) !== 'active' || mood < 20;
+  }
+}
+
+// XP multiplier based on stats
+function xpMultiplier() {
+  if (hunger > 80) return 0.5;   // starving — half XP
+  if (mood < 20)   return 0.6;   // depressed — reduced
+  if (mood > 85 && hunger < 25) return 1.5; // thriving — bonus
+  return 1.0;
+}
+
+// ════════════════════════════════
+// IDLE PERSONALITY ANIMATIONS
+// ════════════════════════════════
+function spawnIdleParticles(emojis, count = 3) {
+  const scene = document.querySelector('.scene');
+  if (!scene) return;
+  for (let i = 0; i < count; i++) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'idle-particle';
+      el.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+      el.style.left = (25 + Math.random() * 50) + '%';
+      el.style.top  = (30 + Math.random() * 30) + '%';
+      el.style.setProperty('--dx', (Math.random() * 40 - 20) + 'px');
+      scene.appendChild(el);
+      setTimeout(() => el.remove(), 2000);
+    }, i * 180);
+  }
+}
+
+function zoomieStreak() {
+  const scene = document.querySelector('.scene');
+  if (!scene) return;
+  const el = document.createElement('div');
+  el.className = 'zoomie-streak';
+  el.textContent = '🦔💨';
+  el.style.top = (50 + Math.random() * 20) + '%';
+  scene.appendChild(el);
+  setTimeout(() => el.remove(), 1400);
+}
+
+function sageArtifact() {
+  const scene = document.querySelector('.scene');
+  if (!scene) return;
+  const artifact = ARTIFACTS[Math.floor(Math.random() * ARTIFACTS.length)];
+  const el = document.createElement('div');
+  el.className = 'artifact-find';
+  el.textContent = 'FOUND ' + artifact + '!';
+  el.style.left = (20 + Math.random() * 40) + '%';
+  el.style.bottom = '100px';
+  scene.appendChild(el);
+  SFX.bugCatch();
+  gainXP(15);
+  setTimeout(() => el.remove(), 3000);
+}
+
+// Idle animation scheduler — fires every 12-20s during active window
+let idleTimer = null;
+function scheduleIdle() {
+  clearTimeout(idleTimer);
+  const delay = 12000 + Math.random() * 8000;
+  idleTimer = setTimeout(() => {
+    const phase = getPhase(currentHour);
+    if (phase !== 'active' && phase !== 'stir') { scheduleIdle(); return; }
+    const type = quillingLocked ? lockedType : currentPersonality;
+    switch(type) {
+      case 'zoomie':  zoomieStreak(); spawnIdleParticles(['⚡','💨'], 2); SFX.huntStart(); break;
+      case 'zen':     spawnIdleParticles(['♥','🌙','💙'], 4); SFX.anoint(); break;
+      case 'chaser':  spawnIdleParticles(['✨','🌺','🎨'], 4); break;
+      case 'sage':    if (Math.random() > 0.4) sageArtifact(); break;
+      default:        spawnIdleParticles(['💭','❓'], 2); break;
+    }
+    scheduleIdle();
+  }, delay);
+}
+
+// ════════════════════════════════
+// HOMIE CARD
+// ════════════════════════════════
+function showCard() {
+  SFX.click();
+  const canvas = document.getElementById('homieCanvas');
+  const ctx    = canvas.getContext('2d');
+  const W = 320, H = 200;
+  canvas.width = W; canvas.height = H;
+
+  const type = quillingLocked ? lockedType : currentPersonality;
+  const p    = P[type] || P.generic;
+  const qColor = QUILL_COLORS[type] || QUILL_COLORS.generic;
+
+  // Background
+  ctx.fillStyle = '#3d2800';
+  ctx.fillRect(0, 0, W, H);
+
+  // Border
+  ctx.strokeStyle = '#b8860b';
+  ctx.lineWidth = 4;
+  ctx.strokeRect(4, 4, W-8, H-8);
+  ctx.strokeStyle = '#7a5c00';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(8, 8, W-16, H-16);
+
+  // Quill color band
+  ctx.fillStyle = qColor;
+  ctx.globalAlpha = 0.25;
+  ctx.fillRect(8, 8, W-16, H-16);
+  ctx.globalAlpha = 1;
+
+  // Title
+  ctx.font = 'bold 11px monospace';
+  ctx.fillStyle = '#b8860b';
+  ctx.textAlign = 'center';
+  ctx.fillText('◈ HEDGEHOMIES ◈', W/2, 30);
+
+  // Hog emoji (big)
+  ctx.font = '52px serif';
+  ctx.fillText(p.icon, W/2 - 60, 110);
+
+  // Quill color dot
+  ctx.fillStyle = qColor;
+  ctx.beginPath();
+  ctx.arc(W/2 - 60, 128, 8, 0, Math.PI*2);
+  ctx.fill();
+  ctx.strokeStyle = '#b8860b';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+
+  // Name
+  ctx.font = 'bold 16px monospace';
+  ctx.fillStyle = '#f5ead0';
+  ctx.textAlign = 'left';
+  ctx.fillText(petName, W/2 - 20, 75);
+
+  // Type
+  ctx.font = '9px monospace';
+  ctx.fillStyle = qColor;
+  ctx.fillText(p.name, W/2 - 20, 92);
+
+  // Stats
+  ctx.font = '8px monospace';
+  ctx.fillStyle = '#c9b97a';
+  ctx.fillText('LV.' + level + '  |  DAY ' + daysAlive, W/2 - 20, 112);
+  ctx.fillText('MOOD: ' + Math.round(mood) + '%', W/2 - 20, 128);
+  ctx.fillText('HUNGER: ' + Math.round(hunger) + '%', W/2 - 20, 142);
+
+  // DNA bars
+  const dnaTotal = Object.values(dna).reduce((a,b)=>a+b,0) || 1;
+  const scores = {
+    '⚡': Math.round(dna.protein/dnaTotal*100),
+    '🌙': Math.round(dna.pets/dnaTotal*100),
+    '✨': Math.round(dna.scents/dnaTotal*100),
+    '🍄': Math.round(dna.solitude/dnaTotal*100),
+  };
+  let bx = W/2 - 20;
+  Object.entries(scores).forEach(([icon, val]) => {
+    ctx.font = '8px serif';
+    ctx.fillStyle = '#c9b97a';
+    ctx.fillText(icon + ' ' + val + '%', bx, 162);
+    bx += 56;
+  });
+
+  // Footer
+  ctx.font = '7px monospace';
+  ctx.fillStyle = '#7a5c00';
+  ctx.textAlign = 'center';
+  ctx.fillText('hedgehomies.github.io', W/2, H - 14);
+
+  document.getElementById('cardModal').className = 'show';
+}
+
+function downloadCard() {
+  const canvas = document.getElementById('homieCanvas');
+  const a = document.createElement('a');
+  a.download = petName.toLowerCase() + '-homie-card.png';
+  a.href = canvas.toDataURL('image/png');
+  a.click();
+}
+
+function closeCard() {
+  document.getElementById('cardModal').className = '';
+}
+
+// ════════════════════════════════
+// HEDGE HANG SYSTEM
+// ════════════════════════════════
+let friendState  = null; // decoded friend data from URL
+let hangHuntActive = false;
+let hangHuntTimer  = null;
+let hangSecsLeft   = 30;
+let myHangScore    = 0;
+let friendHangScore= 0;
+let hangHeartTimer = null;
+
+// Encode my state into a compact URL param
+function encodeMyState() {
+  const type = quillingLocked ? lockedType : currentPersonality;
+  const payload = {
+    n: petName,
+    l: level,
+    t: type,
+    q: QUILL_COLORS[type] || '#7a5c00',
+    d: Math.round(dna.protein) + ',' + Math.round(dna.pets) + ',' + Math.round(dna.scents) + ',' + Math.round(dna.solitude),
+  };
+  return btoa(encodeURIComponent(JSON.stringify(payload)));
+}
+
+function decodeState(encoded) {
+  try {
+    return JSON.parse(decodeURIComponent(atob(encoded)));
+  } catch(e) { return null; }
+}
+
+// Generate invite URL
+function inviteFriend() {
+  SFX.click();
+  const code = encodeMyState();
+  const url  = window.location.origin + window.location.pathname + '?hang=' + code;
+  // Copy to clipboard
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(url).then(() => showCopyToast('LINK COPIED! SEND TO A FRIEND 📲'));
+  } else {
+    // Fallback
+    const ta = document.createElement('textarea');
+    ta.value = url;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    ta.remove();
+    showCopyToast('LINK COPIED! SEND TO A FRIEND 📲');
+  }
+}
+
+function showCopyToast(msg) {
+  let t = document.querySelector('.copy-toast');
+  if (!t) { t = document.createElement('div'); t.className = 'copy-toast'; document.body.appendChild(t); }
+  t.textContent = msg;
+  t.className = 'copy-toast show';
+  setTimeout(() => t.className = 'copy-toast', 2800);
+}
+
+// Init hang screen — read URL param if present, set up both hogs
+function initHangScreen() {
+  // Apply park sky based on current time
+  const phase = getPhase(currentHour);
+  const isNight = phase === 'active' || phase === 'deep';
+  document.getElementById('parkSky').style.background   = getSkyColor(currentHour);
+  document.getElementById('parkSun').style.opacity      = (currentHour >= 7 && currentHour < 17) ? '.9' : '0';
+  document.getElementById('parkMoon').style.opacity     = isNight ? '.9' : '0';
+  document.getElementById('parkStars').style.opacity    = isNight ? '1' : '0';
+  document.querySelectorAll('.park-firefly').forEach(f => {
+    f.style.animationPlayState = isNight ? 'running' : 'paused';
+    f.style.opacity = isNight ? null : '0';
+  });
+
+  // My hog — left side
+  const myType = quillingLocked ? lockedType : currentPersonality;
+  applyHangQuill('hql', QUILL_COLORS[myType] || '#7a5c00');
+  document.getElementById('hangSvgLeft').className = 'hang-svg';
+  document.getElementById('hangNameLeft').textContent = petName || 'YOU';
+  document.getElementById('hangLvLeft').textContent   = 'LV.' + level;
+
+  // Check URL for friend hang param
+  const urlParams = new URLSearchParams(window.location.search);
+  const hangParam = urlParams.get('hang');
+
+  if (hangParam) {
+    friendState = decodeState(hangParam);
+    if (friendState) {
+      // Friend is joining — render their hog
+      applyHangQuill('hqr', friendState.q || '#7a5c00');
+      document.getElementById('hangSvgRight').className = 'hang-svg';
+      document.getElementById('hangNameRight').textContent = friendState.n || 'FRIEND';
+      document.getElementById('hangLvRight').textContent   = 'LV.' + (friendState.l || '?');
+      document.getElementById('hangStatus').textContent    = friendState.n + ' IS HERE! 🎉';
+      document.getElementById('hangHuntBtn').style.display = 'block';
+      document.getElementById('hangInviteBtn').style.display = 'none';
+      startIdleHearts();
+      SFX.levelUp();
+    }
+  } else {
+    // Solo — right hog is greyed out / waiting
+    document.getElementById('hangSvgRight').className = 'hang-svg waiting';
+    document.getElementById('hangNameRight').textContent = '???';
+    document.getElementById('hangLvRight').textContent   = 'INVITE!';
+    document.getElementById('hangStatus').textContent    = 'INVITE A FRIEND TO HANG!';
+    document.getElementById('hangHuntBtn').style.display = 'none';
+    document.getElementById('hangInviteBtn').style.display = 'block';
+  }
+}
+
+function applyHangQuill(cls, color) {
+  document.querySelectorAll('.' + cls).forEach(r => r.setAttribute('fill', color));
+}
+
+// Idle hearts between the two hogs when both present
+function startIdleHearts() {
+  clearInterval(hangHeartTimer);
+  const hearts = ['♥','💛','✨','🌿'];
+  hangHeartTimer = setInterval(() => {
+    const el = document.getElementById('hangHearts');
+    if (!el) return;
+    el.textContent = hearts[Math.floor(Math.random()*hearts.length)];
+    setTimeout(() => { if (el) el.textContent = ''; }, 900);
+  }, 2200);
+}
+
+// ── HANG HUNT ──
+function startHangHunt() {
+  if (hangHuntActive) return;
+  hangHuntActive  = true;
+  myHangScore     = 0;
+  friendHangScore = 0;
+  hangSecsLeft    = 30;
+
+  document.getElementById('hangHuntBtn').style.display   = 'none';
+  document.getElementById('hangEndBtn').style.display    = 'block';
+  document.getElementById('hangTimerBox').style.display  = 'block';
+  document.getElementById('hangStatus').style.display    = 'none';
+  document.getElementById('hangScoreLeft').className     = 'hang-score-badge show';
+  document.getElementById('hangScoreRight').className    = 'hang-score-badge show';
+  updateHangScores();
+  updateHangTimer();
+  SFX.huntStart();
+  clearInterval(hangHeartTimer);
+
+  spawnHangBug(); spawnHangBug(); spawnHangBug();
+
+  hangHuntTimer = setInterval(() => {
+    hangSecsLeft--;
+    updateHangTimer();
+    if (hangSecsLeft <= 0) { endHangHunt(); return; }
+    // Simulate friend catching bugs occasionally
+    if (friendState && hangSecsLeft % 4 === 0) {
+      friendHangScore++;
+      updateHangScores();
+      animateFriendCatch();
+    }
+    if (hangSecsLeft % 5 === 0) spawnHangBug();
+  }, 1000);
+}
+
+function updateHangTimer() {
+  const s = hangSecsLeft;
+  document.getElementById('hangTimerLbl').textContent = '0:' + String(s).padStart(2,'0');
+  document.getElementById('hangCombined').textContent = '🐛 ' + (myHangScore + friendHangScore);
+}
+
+function updateHangScores() {
+  document.getElementById('hangScoreLeft').textContent  = myHangScore;
+  document.getElementById('hangScoreRight').textContent = friendHangScore;
+}
+
+function spawnHangBug() {
+  if (!hangHuntActive) return;
+  const layer = document.getElementById('hangBugLayer');
+  if (!layer) return;
+  const bug = document.createElement('div');
+  bug.className = 'hang-bug';
+  bug.textContent = BUGS[Math.floor(Math.random()*BUGS.length)];
+  bug.style.left = (8 + Math.random()*76) + '%';
+  bug.style.top  = (22 + Math.random()*44) + '%';
+  const catchIt = () => {
+    if (!bug.parentNode) return;
+    bug.remove();
+    myHangScore++;
+    updateHangScores();
+    updateHangTimer();
+    SFX.bugCatch();
+    gainXP(6);
+    // Brief scale pop on my hog
+    const sv = document.getElementById('hangSvgLeft');
+    sv.style.transform = 'scale(1.15)';
+    setTimeout(() => sv.style.transform = '', 120);
+    setTimeout(() => { if (hangHuntActive) spawnHangBug(); }, 500);
+  };
+  bug.addEventListener('click', catchIt);
+  bug.addEventListener('touchstart', e => { e.preventDefault(); catchIt(); }, { passive:false });
+  layer.appendChild(bug);
+}
+
+function animateFriendCatch() {
+  const sv = document.getElementById('hangSvgRight');
+  sv.style.transform = 'scaleX(-1) scale(1.15)';
+  setTimeout(() => sv.style.transform = 'scaleX(-1)', 120);
+}
+
+function endHangHunt() {
+  hangHuntActive = false;
+  clearInterval(hangHuntTimer);
+  document.querySelectorAll('.hang-bug').forEach(b => b.remove());
+
+  document.getElementById('hangEndBtn').style.display   = 'none';
+  document.getElementById('hangTimerBox').style.display = 'none';
+  document.getElementById('hangStatus').style.display   = 'block';
+
+  const total  = myHangScore + friendHangScore;
+  const winner = myHangScore >= friendHangScore ? (petName||'YOU') : (friendState?.n||'FRIEND');
+  document.getElementById('hangStatus').textContent = '🏆 ' + winner + ' WINS! ' + total + ' BUGS!';
+
+  const bonusXP = myHangScore * 8 + 20;
+  gainXP(bonusXP);
+  SFX.huntEnd();
+  showBanner('HANG HUNT OVER! +' + bonusXP + ' XP!');
+  saveGame();
+
+  if (friendState) {
+    startIdleHearts();
+    document.getElementById('hangHuntBtn').style.display = 'block';
+  } else {
+    document.getElementById('hangInviteBtn').style.display = 'block';
+  }
+}
+
+// Parse hang param on load
+(function checkHangOnLoad() {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('hang')) {
+    // Switch to hang screen after boot completes
+    setTimeout(() => switchScreen(2), 400);
+  }
+})();
 
 // ════════════════════════════════
 // BOOT — check for saved game
@@ -1266,10 +2109,11 @@ setInterval(saveGame, 15000);
 (function boot() {
   const hasSave = loadGame();
   if (hasSave) {
-    // Skip name screen, restore directly
     document.getElementById('nameScreen').style.display = 'none';
+    checkNeglect();
     restoreUI();
     realTick();
+    scheduleIdle();
   }
   // Otherwise name screen stays visible, confirmName() handles first launch
 })();
