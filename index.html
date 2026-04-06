@@ -451,9 +451,19 @@
   /* Hang bug */
   .hang-bug { position:absolute; font-size:24px; cursor:pointer; animation:bugWiggle .3s steps(2) infinite; touch-action:manipulation; z-index:41; }
 
-  /* Copied toast */
-  .copy-toast { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); font-size:8px; color:var(--highlight); background:var(--soil); border:2px solid var(--amber); padding:8px 16px; z-index:200; opacity:0; transition:opacity .3s; white-space:nowrap; pointer-events:none; }
+  /* Copied toast — raised above nav */
+  .copy-toast { position:fixed; bottom:76px; left:50%; transform:translateX(-50%); font-size:8px; color:var(--highlight); background:var(--soil); border:2px solid var(--amber); padding:8px 16px; z-index:900; opacity:0; transition:opacity .3s; white-space:nowrap; pointer-events:none; }
   .copy-toast.show { opacity:1; }
+
+  /* Link modal fallback */
+  .link-modal { position:fixed; inset:0; z-index:800; background:rgba(0,0,0,.75); display:flex; align-items:center; justify-content:center; padding:24px; }
+  .link-modal-inner { background:var(--soil); border:3px solid var(--amber); padding:20px; width:100%; max-width:320px; display:flex; flex-direction:column; gap:10px; }
+  .link-modal-title { font-size:10px; color:var(--amber); text-align:center; }
+  .link-modal-sub   { font-size:6px; color:var(--cream); text-align:center; opacity:.7; }
+  .link-modal-input { font-family:monospace; font-size:9px; color:var(--highlight); background:rgba(255,255,255,.08); border:1px solid var(--amber-dark); padding:8px; word-break:break-all; width:100%; outline:none; }
+  .link-modal-btn   { flex:1; font-family:'Press Start 2P',monospace; font-size:7px; padding:10px 8px; border:none; cursor:pointer; touch-action:manipulation; }
+  .link-modal-btn.copy  { background:var(--amber); color:var(--soil); }
+  .link-modal-btn.close { background:var(--brown-light); color:var(--cream); }
 
   /* Screens track now has 3 panels */
   .screens-track { display:flex; width:300%; height:100%; transition:transform .3s steps(6); }
@@ -2171,23 +2181,73 @@ function decodeState(encoded) {
 }
 
 // Generate invite URL
-function inviteFriend() {
+async function inviteFriend() {
   SFX.click();
   const code = encodeMyState();
   const url  = window.location.origin + window.location.pathname + '?hang=' + code;
-  // Copy to clipboard
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(url).then(() => showCopyToast('LINK COPIED! SEND TO A FRIEND 📲'));
-  } else {
-    // Fallback
-    const ta = document.createElement('textarea');
-    ta.value = url;
-    document.body.appendChild(ta);
-    ta.select();
-    document.execCommand('copy');
-    ta.remove();
-    showCopyToast('LINK COPIED! SEND TO A FRIEND 📲');
+  const shareData = {
+    title: 'HedgeHomies – Hedge Hang!',
+    text:  petName + ' (LV.' + level + ') wants to hang! Tap to join the Hang. 🦔',
+    url:   url,
+  };
+
+  // 1. Try Web Share API (native iOS/Android share sheet — best UX)
+  if (navigator.share) {
+    try {
+      await navigator.share(shareData);
+      showCopyToast('SHARED! 🦔');
+      return;
+    } catch(e) {
+      // User cancelled or share failed — fall through
+      if (e.name === 'AbortError') return; // user cancelled, do nothing
+    }
   }
+
+  // 2. Try modern clipboard API
+  if (navigator.clipboard && window.isSecureContext) {
+    try {
+      await navigator.clipboard.writeText(url);
+      showCopyToast('LINK COPIED! SEND TO A FRIEND 📲');
+      return;
+    } catch(e) {
+      // Fall through to manual display
+    }
+  }
+
+  // 3. Last resort — show the link so they can copy it manually
+  showLinkModal(url);
+}
+
+function showLinkModal(url) {
+  // Remove any existing modal
+  document.querySelector('.link-modal')?.remove();
+  const modal = document.createElement('div');
+  modal.className = 'link-modal';
+  modal.innerHTML =
+    '<div class="link-modal-inner">' +
+    '<div class="link-modal-title">YOUR HANG LINK</div>' +
+    '<div class="link-modal-sub">Tap the link below to copy it:</div>' +
+    '<input class="link-modal-input" id="hangLinkInput" readonly value="' + url + '">' +
+    '<div style="display:flex;gap:8px;margin-top:12px">' +
+    '<button class="link-modal-btn copy" onclick="copyLinkManual()">📋 COPY</button>' +
+    '<button class="link-modal-btn close" onclick="this.closest(\'.link-modal\').remove()">✕</button>' +
+    '</div></div>';
+  document.body.appendChild(modal);
+  // Auto-select on mobile
+  setTimeout(() => {
+    const inp = document.getElementById('hangLinkInput');
+    if (inp) { inp.focus(); inp.select(); }
+  }, 100);
+}
+
+function copyLinkManual() {
+  const inp = document.getElementById('hangLinkInput');
+  if (!inp) return;
+  inp.select();
+  inp.setSelectionRange(0, 99999);
+  try { document.execCommand('copy'); } catch(e) {}
+  showCopyToast('COPIED! 📲');
+  document.querySelector('.link-modal')?.remove();
 }
 
 function showCopyToast(msg) {
