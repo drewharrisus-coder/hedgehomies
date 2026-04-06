@@ -628,6 +628,8 @@ function confirmName() {
   petNameLabel.textContent = petName;
   petLvLabel.textContent   = 'LV.' + level;
   document.getElementById('nameScreen').style.display = 'none';
+  SFX.click();
+  saveGame();
   realTick();
 }
 
@@ -727,11 +729,13 @@ function updateXPBar() {
 }
 
 function triggerLevelUp() {
+  SFX.levelUp();
   lvlFlashTxt.textContent = 'LEVEL UP!';
   lvlFlashSub.textContent = 'LV.' + level;
   lvlFlash.className = 'levelup-flash show';
   setTimeout(() => lvlFlash.className = 'levelup-flash', 2000);
   showBanner('⭐ LEVEL ' + level + '!');
+  saveGame();
 }
 
 // ════════════════════════════════
@@ -761,17 +765,18 @@ function confirmQuilling() {
   dominantName.textContent = P[lockedType].name;
   dominantIcon.textContent = P[lockedType].icon;
 
-  // Lock DNA buttons
   document.querySelectorAll('.p-btn').forEach(b => b.disabled = true);
   document.querySelectorAll('.p-card').forEach(c => c.onclick = null);
   document.getElementById('card-'+lockedType).className = 'p-card dominant locked';
   quillingNotice.className = 'quilling-notice show';
 
+  SFX.quilling();
   showBanner('🌟 GREAT QUILLING COMPLETE!');
   lvlFlashTxt.textContent = '✨ EVOLVED!';
   lvlFlashSub.textContent = P[lockedType].name;
   lvlFlash.className = 'levelup-flash show';
   setTimeout(() => lvlFlash.className = 'levelup-flash', 3000);
+  saveGame();
 }
 
 // ════════════════════════════════
@@ -798,9 +803,11 @@ function anointHog() {
   dna.scents = Math.min(100, dna.scents + 8);
   mood = Math.min(100, mood + 6);
   gainXP(12);
+  SFX.anoint();
   refreshDNA();
   showBubble(scent + ' ANOINTED!');
   if (!quillingLocked) setPersonality('chaser');
+  saveGame();
 }
 
 // ════════════════════════════════
@@ -817,6 +824,7 @@ function startBugHunt() {
   bugHuntEl.className = 'active';
   huntScoreEl.textContent = 'BUGS: 0';
   updateHuntTimer();
+  SFX.huntStart();
 
   // Disable other actions during hunt
   document.getElementById('btnFeed').disabled   = true;
@@ -873,6 +881,7 @@ function catchBug(bugEl, scene) {
   bugEl.remove();
   huntBugsCount++;
   huntScoreEl.textContent = 'BUGS: ' + huntBugsCount;
+  SFX.bugCatch();
   dna.protein = Math.min(100, dna.protein + 4);
   gainXP(8);
   mood = Math.min(100, mood + 3);
@@ -900,8 +909,10 @@ function endBugHunt() {
 
   const bonus = huntBugsCount * 5;
   gainXP(bonus);
+  SFX.huntEnd();
   showBanner('HUNT OVER! ' + huntBugsCount + ' BUGS! +' + bonus + 'XP');
   refreshDNA();
+  saveGame();
 }
 
 // ════════════════════════════════
@@ -998,6 +1009,7 @@ function tapHog() {
   const p = P[currentPersonality];
   const awake = phase === 'active' || phase === 'stir';
   showBubble((awake ? p.active : p.sleep)[tapCount % (awake ? p.active : p.sleep).length]);
+  SFX.pet();
 
   if (awake) {
     mood = Math.min(100, mood + 5);
@@ -1010,6 +1022,7 @@ function tapHog() {
   hog.style.transform = 'translateX(-50%) scale(1.12)';
   setTimeout(() => hog.style.transform = '', 150);
   refreshDNA();
+  saveGame();
 }
 
 function feedHog() {
@@ -1017,12 +1030,15 @@ function feedHog() {
   const phase = getPhase(currentHour);
   if (phase === 'active' || phase === 'stir') {
     showBubble('NOM NOM! 🍖');
+    SFX.feed();
     hunger = Math.max(0, hunger - 20);
     mood   = Math.min(100, mood + 8);
     dna.protein = Math.min(100, dna.protein + 5);
     gainXP(10);
     refreshDNA();
+    saveGame();
   } else {
+    SFX.click();
     showBubble('...zzz 💤');
   }
 }
@@ -1037,6 +1053,7 @@ slider.addEventListener('input', () => {
   if (prev !== next) {
     const b = { stir:'⭐ ' + petName + ' IS STIRRING...', active:'🌙 ACTIVE WINDOW BEGINS!', sleep:'💤 ' + petName + ' IS SLEEPING', deep:'🌙 DEEP SLEEP MODE' };
     showBanner(b[next]);
+    if (next === 'active') SFX.activeWindow();
   }
   updateDisplay(currentHour);
 });
@@ -1050,7 +1067,212 @@ function realTick() {
   updateDisplay(currentHour);
 }
 setInterval(realTick, 60000);
-// Don't auto-start — wait for name confirmation
+
+// ════════════════════════════════
+// SOUND ENGINE (Web Audio API)
+// ════════════════════════════════
+let audioCtx = null;
+
+function getAudioCtx() {
+  if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  // Resume on iOS which suspends by default
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+// Core synth: play a square/sine wave burst
+function playTone(freq, duration, type = 'square', vol = 0.18, delay = 0) {
+  try {
+    const ctx = getAudioCtx();
+    const osc  = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.type = type;
+    osc.frequency.setValueAtTime(freq, ctx.currentTime + delay);
+    gain.gain.setValueAtTime(0, ctx.currentTime + delay);
+    gain.gain.linearRampToValueAtTime(vol, ctx.currentTime + delay + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + duration);
+    osc.start(ctx.currentTime + delay);
+    osc.stop(ctx.currentTime + delay + duration + 0.05);
+  } catch(e) {}
+}
+
+// Noise burst (for scratch / rustle)
+function playNoise(duration, vol = 0.08, delay = 0) {
+  try {
+    const ctx    = getAudioCtx();
+    const size   = ctx.sampleRate * duration;
+    const buffer = ctx.createBuffer(1, size, ctx.sampleRate);
+    const data   = buffer.getChannelData(0);
+    for (let i = 0; i < size; i++) data[i] = Math.random() * 2 - 1;
+    const src    = ctx.createBufferSource();
+    const gain   = ctx.createGain();
+    const filter = ctx.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 800;
+    filter.Q.value = 0.5;
+    src.buffer = buffer;
+    src.connect(filter);
+    filter.connect(gain);
+    gain.connect(ctx.destination);
+    gain.gain.setValueAtTime(0, ctx.currentTime + delay);
+    gain.gain.linearRampToValueAtTime(vol, ctx.currentTime + delay + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + delay + duration);
+    src.start(ctx.currentTime + delay);
+    src.stop(ctx.currentTime + delay + duration + 0.05);
+  } catch(e) {}
+}
+
+const SFX = {
+  // Soft scratch when petting
+  pet() {
+    playNoise(0.06, 0.10);
+    playNoise(0.05, 0.08, 0.07);
+    playNoise(0.06, 0.07, 0.13);
+  },
+
+  // Crunchy nom on feed
+  feed() {
+    playNoise(0.04, 0.14);
+    playTone(220, 0.06, 'square', 0.10, 0.05);
+    playNoise(0.04, 0.12, 0.10);
+    playTone(196, 0.06, 'square', 0.08, 0.15);
+  },
+
+  // Sparkly ascending tones for anoint
+  anoint() {
+    [523, 659, 784, 1047].forEach((f, i) => playTone(f, 0.12, 'sine', 0.12, i * 0.08));
+  },
+
+  // Short blip for catching a bug
+  bugCatch() {
+    playTone(440, 0.04, 'square', 0.14);
+    playTone(660, 0.06, 'square', 0.14, 0.05);
+  },
+
+  // Hunt start — descending alert
+  huntStart() {
+    [880, 660, 440].forEach((f, i) => playTone(f, 0.08, 'square', 0.16, i * 0.07));
+  },
+
+  // Hunt end fanfare
+  huntEnd() {
+    [330, 392, 494, 392, 523].forEach((f, i) => playTone(f, 0.10, 'square', 0.14, i * 0.09));
+  },
+
+  // 3-note level up chime
+  levelUp() {
+    [523, 659, 784].forEach((f, i) => playTone(f, 0.15, 'sine', 0.20, i * 0.12));
+    playTone(1047, 0.3, 'sine', 0.18, 0.40);
+  },
+
+  // Big Great Quilling fanfare
+  quilling() {
+    const melody = [392, 494, 587, 659, 784, 659, 784, 1047];
+    melody.forEach((f, i) => playTone(f, 0.18, 'sine', 0.20, i * 0.13));
+    // Low bass swell underneath
+    [130, 165, 196].forEach((f, i) => playTone(f, 0.4, 'sine', 0.10, i * 0.26));
+  },
+
+  // Soft chime when active window begins
+  activeWindow() {
+    playTone(523, 0.2, 'sine', 0.12);
+    playTone(659, 0.2, 'sine', 0.12, 0.18);
+  },
+
+  // Click for UI buttons
+  click() {
+    playTone(300, 0.04, 'square', 0.08);
+  },
+};
+
+// ════════════════════════════════
+// LOCALSTORAGE SAVE / LOAD
+// ════════════════════════════════
+const SAVE_KEY = 'hedgehomies_v1';
+
+function saveGame() {
+  try {
+    const state = {
+      petName, level, xp, mood, hunger, energy,
+      dna: { ...dna },
+      currentPersonality, quillingLocked, lockedType,
+      tapCount,
+    };
+    localStorage.setItem(SAVE_KEY, JSON.stringify(state));
+  } catch(e) {}
+}
+
+function loadGame() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if (!raw) return false;
+    const s = JSON.parse(raw);
+    petName           = s.petName           || '';
+    level             = s.level             || 1;
+    xp                = s.xp               || 0;
+    mood              = s.mood              || 60;
+    hunger            = s.hunger            || 40;
+    energy            = s.energy            || 80;
+    dna               = s.dna              || { protein:30, pets:20, scents:10, solitude:40 };
+    currentPersonality= s.currentPersonality|| 'generic';
+    quillingLocked    = s.quillingLocked    || false;
+    lockedType        = s.lockedType        || null;
+    tapCount          = s.tapCount          || 0;
+    return !!petName;
+  } catch(e) { return false; }
+}
+
+function restoreUI() {
+  // Top bar
+  petNameLabel.textContent = petName;
+  petLvLabel.textContent   = 'LV.' + level;
+  updateXPBar();
+
+  // Quill color
+  applyQuillColor(quillingLocked ? lockedType : currentPersonality);
+
+  // DNA panel
+  refreshDNA();
+
+  // Quilling lock state
+  if (quillingLocked) {
+    document.querySelectorAll('.p-btn').forEach(b => b.disabled = true);
+    document.querySelectorAll('.p-card').forEach(c => c.onclick = null);
+    if (lockedType) document.getElementById('card-'+lockedType).className = 'p-card dominant locked';
+    quillingNotice.className = 'quilling-notice show';
+    dominantName.textContent = P[lockedType].name;
+    dominantIcon.textContent = P[lockedType].icon;
+  } else {
+    // Highlight correct personality buttons
+    ['generic','zoomie','zen','chaser','sage'].forEach(t => {
+      const b = document.getElementById('pbtn-'+t);
+      if (b) b.className = 'p-btn' + (t===currentPersonality?' sel':'');
+    });
+    ['zoomie','zen','chaser','sage'].forEach(t => {
+      const c = document.getElementById('card-'+t);
+      if (c) c.className = 'p-card' + (t===currentPersonality?' dominant':'');
+    });
+  }
+}
+
+// Auto-save every 15 seconds and on key interactions
+setInterval(saveGame, 15000);
+
+// ════════════════════════════════
+// BOOT — check for saved game
+// ════════════════════════════════
+(function boot() {
+  const hasSave = loadGame();
+  if (hasSave) {
+    // Skip name screen, restore directly
+    document.getElementById('nameScreen').style.display = 'none';
+    restoreUI();
+    realTick();
+  }
+  // Otherwise name screen stays visible, confirmName() handles first launch
+})();
 </script>
 </body>
 </html>
